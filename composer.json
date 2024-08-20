@@ -1,0 +1,38 @@
+{
+    "name": "tomatophp/filament-payments",
+    "type": "library",
+    "description": "Manage your payments inside FilamentPHP app with multi payment gateway integration",
+    "keywords": [
+        "php",
+        "laravel",
+        "template"
+    ],
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "TomatoPHP\\FilamentPayments\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "TomatoPHP\\FilamentPayments\\FilamentPaymentsServiceProvider"
+            ]
+        }
+    },
+    "authors": [
+        {
+            "name": "Fady Mondy",
+            "email": "info@3x1.io"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "tomatophp/console-helpers": "^1.0"
+    }
+}
