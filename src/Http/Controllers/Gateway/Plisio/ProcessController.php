@@ -1,6 +1,6 @@
 <?php
 
-namespace TomatoPHP\FilamentPayments\Controllers\Gateway\Plisio;
+namespace TomatoPHP\FilamentPayments\Http\Controllers\Gateway\Plisio;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;

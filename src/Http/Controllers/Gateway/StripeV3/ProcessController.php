@@ -1,6 +1,6 @@
 <?php
 
-namespace TomatoPHP\FilamentPayments\Controllers\Gateway\StripeV3;
+namespace TomatoPHP\FilamentPayments\Http\Controllers\Gateway\StripeV3;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -42,7 +42,7 @@ class ProcessController extends Controller
             return json_encode($send);
         }
 
-        $send['view'] = 'filament-payments::payment.' . $alias;
+        $send['redirect'] = $session->url;
         $send['session'] = $session->id;
         $send['publishable_key'] = $stripeData['publishable_key'];
         $payment->method_code = json_decode(json_encode($session))->id;

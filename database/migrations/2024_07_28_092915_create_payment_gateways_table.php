@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('payment_gateways', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->json('name');
             $table->string('alias')->nullable();
             $table->boolean('status')->default(1)->comment('0=>disable, 1=>enable');
             $table->text('gateway_parameters')->nullable();

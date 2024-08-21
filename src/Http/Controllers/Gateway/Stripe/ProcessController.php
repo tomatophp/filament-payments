@@ -1,6 +1,6 @@
 <?php
 
-namespace TomatoPHP\FilamentPayments\Controllers\Gateway\Stripe;
+namespace TomatoPHP\FilamentPayments\Http\Controllers\Gateway\Stripe;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;

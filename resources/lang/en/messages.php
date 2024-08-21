@@ -43,8 +43,17 @@ return [
     "payment_gateways" => [
         "title" => "Payment Gateways",
         "sections" => [
-            "gateway_parameters" => [
-                "title" => "Gateway Parameters",
+            "payment_gateway_data" => [
+                "title" => "Payment Gateway Data",
+                "columns" => [
+                    "image" => "Image",
+                    "name" => "Name",
+                    "description" => "Description",
+                    "status" => "Status",
+                ]
+            ],
+            "gateway_parameters_data" => [
+                "title" => "Gateway Parameters Data",
                 "columns" => [
                     "key" => "Key",
                     "value" => "Value",

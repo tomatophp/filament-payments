@@ -2,6 +2,7 @@
 
 namespace TomatoPHP\FilamentPayments\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Models\Account;
 use TomatoPHP\FilamentPayments\Models\Payment;
 use TomatoPHP\FilamentPayments\Models\PaymentGateway;
@@ -13,134 +14,7 @@ use Illuminate\Support\Str;
 
 class PaymentController extends Controller
 {
-    public function pay(Request $request, $trx)
-    {
-        $userIp = $request->ip();
-
-        $payment = Payment::where('trx', $trx)->where('status', 0)->firstOrFail();
-
-        $gateways = PaymentGateway::where('status', 1)->get();
-
-        // Filter gateways that support the payment's method_currency
-        $filteredGateways = $gateways->filter(function ($gateway) use ($payment) {
-            $supportedCurrencies = collect($gateway->supported_currencies);
-
-            return $supportedCurrencies->contains('currency', $payment->method_currency);
-        });
-
-        return view('filament-payments::pay.index', compact('payment', 'gateways', 'userIp'));
-    }
-
-    public function calculateFee(Request $request)
-    {
-        $gatewayId = $request->input('gateway_id');
-        $trx = $request->input('trx');
-
-        $payment = Payment::where('trx', $trx)->where('status', 0)->firstOrFail();
-
-        $selectedGateway = PaymentGateway::where('status', 1)->find($gatewayId);
-
-        if ($selectedGateway) {
-            $supportedCurrencies = $selectedGateway->supported_currencies;
-
-            // Get the currency from the payment method
-            $currencyCode = $payment->method_currency;
-            $currencyData = null;
-
-            foreach ($supportedCurrencies as $currency) {
-                if ($currency['currency'] === $currencyCode) {
-                    $currencyData = $currency;
-                    break;
-                }
-            }
-
-            if ($currencyData) {
-                $fixedFee = (float)$currencyData['fixed_charge'];
-                $percentageFee = (float)$currencyData['percent_charge'];
-                $feeAmount = $fixedFee + ($payment->amount * $percentageFee / 100);
-
-                return response()->json([
-                    'success' => true,
-                    'fixedFee' => $fixedFee,
-                    'feeAmount' => $feeAmount,
-                ]);
-            }
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Currency not supported',
-            ], 400);
-        }
-
-        return response()->json(['success' => false], 400);
-    }
-
-    public function process(Request $request, $trx)
-    {
-        $request->validate([
-            'gateway' => 'required',
-        ]);
-
-        $gateway = PaymentGateway::where('id', $request->gateway)->where('status', 1)->firstOrFail();
-        $payment = Payment::where('trx', $trx)->where('status', 0)->firstOrFail();
-
-        if (!$gateway) {
-            return back();
-        }
-
-        $supportedCurrencies = $gateway->supported_currencies;
-
-        $currencyCode = $payment->method_currency;
-        $currencyData = null;
-
-        foreach ($supportedCurrencies as $currency) {
-            if ($currency['currency'] === $currencyCode) {
-                $currencyData = $currency;
-                break;
-            }
-        }
-
-        if (!$currencyData) {
-            return back();
-        }
-
-        $fixedFee = (float)$currencyData['fixed_charge'];
-        $percentageFee = (float)$currencyData['percent_charge'];
-        $feeAmount = $fixedFee + ($payment->amount * $percentageFee / 100);
-
-        $payment->update([
-            'method_id' => $request->gateway,
-            'method_name' => $gateway->name,
-            'charge' => $feeAmount,
-            'rate' => $currencyData['rate'],
-            'final_amount' => $payment->amount + $feeAmount,
-        ]);
-
-        $dirName = $gateway->alias;
-        $new = __NAMESPACE__ . '\\Gateway'  . '\\' . $dirName . '\\ProcessController';
-
-        $data = $new::process($payment);
-        $data = json_decode($data);
-
-        if (isset($data->error)) {
-            $notify[] = ['error', $data->message];
-            return back()->withNotify($notify);
-        }
-
-        if (@$data->session) {
-            $payment->method_code = $data->session;
-            $payment->save();
-        }
-
-        if (isset($data->redirect)) {
-            return redirect($data->redirect);
-        }
-
-        $pageTitle = 'Payment Confirm';
-        return view("$data->view", compact('data', 'pageTitle', 'payment'));
-    }
-
-    public function cancel(Request $request, $trx)
+    public function cancel($trx)
     {
         $payment = Payment::where('trx', $trx)->where('status', 0)->firstOrFail();
 
@@ -151,7 +25,7 @@ class PaymentController extends Controller
         return redirect($payment->failed_url);
     }
 
-    public function depositInsert(Request $request)
+    public function initiate(Request $request)
     {
         // Define the validation rules
         $rules = [
@@ -319,9 +193,10 @@ class PaymentController extends Controller
             $payment->status = 1;
             $payment->save();
 
-            $user = Account::where('id', $payment->team->owner->id)->first();
-
-            $user->deposit($payment->final_amount);
+            if (!$isCancel) {
+                $user = Account::where('id', $payment->team->owner->id)->first();
+                $user->deposit($payment->final_amount);
+            }
 
             if ($isCancel) {
                 $payment->status = 2;
