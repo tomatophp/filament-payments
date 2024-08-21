@@ -2,7 +2,7 @@
 
 use TomatoPHP\FilamentPayments\Http\Controllers\Gateway\Plisio\ProcessController as PlisioProcessController;
 use TomatoPHP\FilamentPayments\Http\Controllers\Gateway\Stripe\ProcessController as StripeProcessController;
-use TomatoPHP\FilamentPayments\Http\Controllers\Gateway\StripeV3\ProcessController;
+use TomatoPHP\FilamentPayments\Http\Controllers\Gateway\StripeV3\ProcessController as StripeV3ProcessController;
 use TomatoPHP\FilamentPayments\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,6 +17,6 @@ Route::middleware(['web'])->name('payment.')->group(function () {
 });
 
 
-Route::any('stripe-v3', [ProcessController::class, 'verify'])->name('stripe-v3');
+Route::any('stripe-v3', [StripeV3ProcessController::class, 'verify'])->name('stripe-v3');
 Route::any('stripe-embedded', [StripeProcessController::class, 'verify'])->name('stripe-embedded');
 Route::any('plisio', [PlisioProcessController::class, 'verify'])->name('plisio');
