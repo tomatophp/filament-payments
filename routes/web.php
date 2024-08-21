@@ -7,12 +7,11 @@ use TomatoPHP\FilamentPayments\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 use TomatoPHP\FilamentPayments\Livewire\PaymentProcess;
 
-Route::middleware(['web'])->name('payment.')->group(function () {
-    Route::get('pay/{trx}', PaymentProcess::class)->name('index');
-    Route::get('pay/{trx}/cancel', [PaymentController::class, 'cancel'])->name('cancel');
-    Route::post('payment/initiate', [PaymentController::class, 'initiate'])->name('initiate');
-    Route::get('payment/info', [PaymentController::class, 'info'])->name('info');
+Route::middleware(['web'])->name('payment.')->prefix('pay')->group(function () {
+    Route::get('{trx}', PaymentProcess::class)->name('index');
+    Route::get('{trx}/cancel', [PaymentController::class, 'cancel'])->name('cancel');
+    Route::post('initiate', [PaymentController::class, 'initiate'])->name('initiate');
+    Route::get('info', [PaymentController::class, 'info'])->name('info');
 });
 
-Route::any('stripe-embedded', [StripeProcessController::class, 'verify'])->name('stripe-embedded');
-Route::any('plisio', [PlisioProcessController::class, 'verify'])->name('plisio');
+Route::any('pay/callback/{gateway}', [PaymentController::class, 'verify'])->name('payments.callback');

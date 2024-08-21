@@ -8,11 +8,16 @@ use TomatoPHP\FilamentPayments\Controllers\PaymentController;
 use TomatoPHP\FilamentPayments\Models\Payment;
 use TomatoPHP\FilamentPayments\Models\PaymentGateway;
 use Stripe\Stripe;
+use TomatoPHP\FilamentPayments\Services\Drivers\StripeV3;
 
 class ProcessController extends Controller
 {
 
-    public static function process($payment)
+    /**
+     * @param $payment
+     * @return false|string
+     */
+    public static function process($payment): false|string
     {
         $stripeData = $payment->gateway->gateway_parameters;
         $alias = $payment->gateway->alias;
@@ -50,26 +55,13 @@ class ProcessController extends Controller
         return json_encode($send);
     }
 
-    public function verify(Request $request)
+    /**
+     * @param Request $request
+     * @return \Illuminate\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @throws \Stripe\Exception\ApiErrorException
+     */
+    public function verify(Request $request): \Illuminate\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
     {
-        $StripeAcc = PaymentGateway::where('alias', 'StripeV3')->orderBy('id', 'desc')->firstOrFail();
-        $gateway_parameter = $StripeAcc->gateway_parameters;
-
-        Stripe::setApiKey($gateway_parameter['secret_key']);
-        $stripeSession = $request->get('session');
-
-        $session = \Stripe\Checkout\Session::retrieve($stripeSession);
-
-        $payment = Payment::where('method_code',  $session->id)->where('status', 0)->firstOrFail()();
-
-        if ($session->status === 'complete') {
-
-            PaymentController::paymentDataUpdate($payment);
-
-            return redirect($payment->success_url);
-        }
-
-        PaymentController::paymentDataUpdate($payment, true);
-        return redirect($payment->failed_url);
+        return StripeV3::verify($request);
     }
 }

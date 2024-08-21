@@ -2,6 +2,7 @@
 
 namespace TomatoPHP\FilamentPayments\Filament\Resources\PaymentResource\Pages;
 
+use TomatoPHP\FilamentPayments\Filament\Pages\PaymentGateway;
 use TomatoPHP\FilamentPayments\Filament\Resources\PaymentResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
@@ -13,7 +14,12 @@ class ListPayments extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            // Actions\CreateAction::make(),
+            Actions\Action::make('payment')
+                ->url(PaymentGateway::getUrl())
+                ->label('Payment Gateway')
+                ->tooltip('Payment Gateway')
+                ->icon('heroicon-o-cog')
+                ->hiddenLabel(),
         ];
     }
 }

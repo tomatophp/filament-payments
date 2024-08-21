@@ -52,6 +52,8 @@ class FilamentPaymentsServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        //you boot methods here
+        $this->app->bind('filament-payments', function () {
+            return new \TomatoPHP\FilamentPayments\Services\FilamentPaymentsServices();
+        });
     }
 }

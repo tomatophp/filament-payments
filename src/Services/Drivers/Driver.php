@@ -1,20 +1,22 @@
 <?php
 
-namespace TomatoPHP\FilamentPayments\Http\Controllers;
+namespace TomatoPHP\FilamentPayments\Services\Drivers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Account;
-use TomatoPHP\FilamentPayments\Models\Payment;
-use TomatoPHP\FilamentPayments\Models\PaymentGateway;
 use App\Models\Team;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
+use TomatoPHP\FilamentPayments\Models\Payment;
 
-class PaymentController extends Controller
+abstract class Driver
 {
-    public function cancel($trx)
+    public static abstract function process($payment): false|string;
+    public static abstract function verify(Request $request): \Illuminate\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector;
+    public abstract function integration(): array;
+
+    public static function cancel($trx)
     {
         $payment = Payment::where('trx', $trx)->where('status', 0)->firstOrFail();
 
@@ -25,7 +27,7 @@ class PaymentController extends Controller
         return redirect($payment->failed_url);
     }
 
-    public function initiate(Request $request)
+    public static function initiate(Request $request)
     {
         // Define the validation rules
         $rules = [
@@ -122,7 +124,7 @@ class PaymentController extends Controller
         ]], 201);
     }
 
-    public function info(Request $request)
+    public static function info(Request $request)
     {
         $rules = [
             'public_key' => 'required|string|max:50',
@@ -187,9 +189,21 @@ class PaymentController extends Controller
         ]);
     }
 
-    public function verify(Request $request, string $gatway)
+    public static function paymentDataUpdate($payment, $isCancel = false)
     {
-        $gaywayClass = app(config('filament-payments.path') . "\\" . $gatway);
-        return $gaywayClass->verify($request);
+        if ($payment->status == 0) {
+            $payment->status = 1;
+            $payment->save();
+
+            if (!$isCancel) {
+                $user = Account::where('id', $payment->team->owner->id)->first();
+                $user->deposit($payment->final_amount);
+            }
+
+            if ($isCancel) {
+                $payment->status = 2;
+                $payment->save();
+            }
+        }
     }
 }

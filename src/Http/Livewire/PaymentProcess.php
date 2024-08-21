@@ -54,7 +54,6 @@ class PaymentProcess extends Component
 
     public function process()
     {
-
         $this->validate([
             'selectedGateway' => 'required',
         ]);
@@ -85,8 +84,7 @@ class PaymentProcess extends Component
             'final_amount' => $this->payment->amount + $feeAmount,
         ]);
 
-        $dirName = $gateway->alias;
-        $new = "TomatoPHP\\FilamentPayments\\Http\\Controllers\\Gateway\\{$dirName}\\ProcessController";
+        $new = app(config('filament-payments.path'). "\\".$gateway->alias);
 
         $data = $new::process($this->payment);
         $data = json_decode($data);

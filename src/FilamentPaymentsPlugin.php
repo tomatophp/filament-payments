@@ -4,6 +4,7 @@ namespace TomatoPHP\FilamentPayments;
 
 use Filament\Contracts\Plugin;
 use Filament\Panel;
+use TomatoPHP\FilamentPayments\Filament\Pages\PaymentGateway;
 use TomatoPHP\FilamentPayments\Filament\Resources\PaymentGatewayResource;
 use TomatoPHP\FilamentPayments\Filament\Resources\PaymentResource;
 
@@ -16,10 +17,13 @@ class FilamentPaymentsPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        $panel->resources([
-            PaymentGatewayResource::class,
-            PaymentResource::class
-        ]);
+        $panel
+            ->pages([
+                PaymentGateway::class
+            ])
+            ->resources([
+                PaymentResource::class
+            ]);
     }
 
     public function boot(Panel $panel): void
