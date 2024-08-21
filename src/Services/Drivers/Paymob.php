@@ -3,10 +3,11 @@
 namespace TomatoPHP\FilamentPayments\Services\Drivers;
 
 use Illuminate\Http\Request;
+use TomatoPHP\FilamentPayments\Models\Payment;
 
 class Paymob extends Driver
 {
-    public static function process($payment): false|string
+    public static function process(Payment $payment): false|string
     {
         return false;
     }

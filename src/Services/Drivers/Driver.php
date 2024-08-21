@@ -12,7 +12,7 @@ use TomatoPHP\FilamentPayments\Models\Payment;
 
 abstract class Driver
 {
-    public static abstract function process($payment): false|string;
+    public static abstract function process(Payment $payment): false|string;
     public static abstract function verify(Request $request): \Illuminate\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector;
     public abstract function integration(): array;
 
