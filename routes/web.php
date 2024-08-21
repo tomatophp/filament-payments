@@ -5,17 +5,14 @@ use TomatoPHP\FilamentPayments\Http\Controllers\Gateway\Stripe\ProcessController
 use TomatoPHP\FilamentPayments\Http\Controllers\Gateway\StripeV3\ProcessController;
 use TomatoPHP\FilamentPayments\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
+use TomatoPHP\FilamentPayments\Livewire\PaymentProcess;
 
 Route::middleware(['web'])->name('payment.')->group(function () {
-    Route::get('pay/{trx}', [PaymentController::class, 'pay'])->name('index');
-    Route::post('pay/{trx}/process', [PaymentController::class, 'process'])->name('pay');
-    Route::post('/payment/calculate-fee', [PaymentController::class, 'calculateFee'])->name('calculateFee');
-
+    Route::get('pay/{trx}', PaymentProcess::class)->name('index');
     Route::get('pay/{trx}/cancel', [PaymentController::class, 'cancel'])->name('cancel');
-    // Route::post('payment/initiate', [PaymentController::class, 'depositInsert'])->name('insert');
-    // Route::get('payment/info', [PaymentController::class, 'info'])->name('info');
+    Route::post('payment/initiate', [PaymentController::class, 'initiate'])->name('initiate');
+    Route::get('payment/info', [PaymentController::class, 'info'])->name('info');
 });
-
 
 Route::any('stripe-v3', [ProcessController::class, 'verify'])->name('stripe-v3');
 Route::any('stripe-embedded', [StripeProcessController::class, 'verify'])->name('stripe-embedded');

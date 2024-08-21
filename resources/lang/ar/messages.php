@@ -43,8 +43,17 @@ return [
     "payment_gateways" => [
         "title" => "بوابات الدفع",
         "sections" => [
-            "gateway_parameters" => [
-                "title" => "معلمات البوابة",
+            "payment_gateway_data" => [
+                "title" => "بيانات بوابة الدفع",
+                "columns" => [
+                    "image" => "الصورة",
+                    "name" => "الاسم",
+                    "description" => "الوصف",
+                    "status" => "الحالة",
+                ]
+            ],
+            "gateway_parameters_data" => [
+                "title" => "بيانات تكوين الدفع",
                 "columns" => [
                     "key" => "المفتاح",
                     "value" => "القيمة",

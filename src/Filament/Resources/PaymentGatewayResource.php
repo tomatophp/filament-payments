@@ -2,6 +2,7 @@
 
 namespace TomatoPHP\FilamentPayments\Filament\Resources;
 
+use Filament\Forms\Components\Grid;
 use TomatoPHP\FilamentPayments\Filament\Resources\PaymentGatewayResource\Pages;
 use TomatoPHP\FilamentPayments\Filament\Resources\PaymentGatewayResource\RelationManagers;
 use TomatoPHP\FilamentPayments\Models\PaymentGateway;
@@ -20,6 +21,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use TomatoPHP\FilamentTranslationComponent\Components\Translation;
 
 class PaymentGatewayResource extends Resource
 {
@@ -53,28 +55,46 @@ class PaymentGatewayResource extends Resource
     {
         return $form
             ->schema([
-                SpatieMediaLibraryFileUpload::make('image')
-                    ->label(trans('filament-payments::messages.payment_gateways.columns.image'))
-                    ->collection('image')
-                    ->columnSpanFull(),
-                TextInput::make('name')
-                    ->label(trans('filament-payments::messages.payment_gateways.columns.name'))
-                    ->required(),
-                Toggle::make('status')
-                    ->label(trans('filament-payments::messages.payment_gateways.columns.status'))
-                    ->default(true),
-                Textarea::make('description')
-                    ->label(trans('filament-payments::messages.payment_gateways.columns.description'))
-                    ->autosize(),
-                Section::make(trans('filament-payments::messages.payment_gateways.sections.gateway_parameters.title'))
-                    ->schema([
-                        KeyValue::make('gateway_parameters')
-                            ->keyLabel(trans('filament-payments::messages.payment_gateways.sections.gateway_parameters.columns.key'))
-                            ->valueLabel(trans('filament-payments::messages.payment_gateways.sections.gateway_parameters.columns.value'))
-                            ->editableKeys(false)
-                            ->addable(false)
-                            ->deletable(false),
-                    ]),
+                Grid::make([
+                    'sm' => 1,
+                    'lg' => 12,
+                ])->schema([
+                    Section::make(trans('filament-payments::messages.payment_gateways.sections.payment_gateway_data.title'))
+                        ->schema([
+                            SpatieMediaLibraryFileUpload::make('image')
+                                ->label(trans('filament-payments::messages.payment_gateways.sections.payment_gateway_data.columns.image'))
+                                ->collection('image')
+                                ->columnSpanFull(),
+                            Translation::make('name')
+                                ->label(trans('filament-payments::messages.payment_gateways.sections.payment_gateway_data.columns.name'))
+                                ->required()
+                                ->columnSpanFull(),
+                            Textarea::make('description')
+                                ->label(trans('filament-payments::messages.payment_gateways.sections.payment_gateway_data.columns.description'))
+                                ->autosize()
+                                ->columnSpanFull(),
+                            Toggle::make('status')
+                                ->label(trans('filament-payments::messages.payment_gateways.sections.payment_gateway_data.columns.status'))
+                                ->default(true),
+                        ])
+                        ->columnSpan(6)
+                        ->collapsible()
+                        ->collapsed(fn($record) => $record),
+
+                    Section::make(trans('filament-payments::messages.payment_gateways.sections.gateway_parameters_data.title'))
+                        ->schema([
+                            KeyValue::make('gateway_parameters')
+                                ->label(trans('filament-payments::messages.payment_gateways.sections.gateway_parameters_data.title'))
+                                ->keyLabel(trans('filament-payments::messages.payment_gateways.sections.gateway_parameters_data.columns.key'))
+                                ->valueLabel(trans('filament-payments::messages.payment_gateways.sections.gateway_parameters_data.columns.value'))
+                                ->editableKeys(false)
+                                ->addable(false)
+                                ->deletable(false),
+                        ])
+                        ->columnSpan(6)
+                        ->collapsible()
+                        ->collapsed(fn($record) => $record),
+                ]),
                 Section::make(trans('filament-payments::messages.payment_gateways.sections.supported_currencies.title'))
                     ->schema([
                         Repeater::make('supported_currencies')
@@ -103,7 +123,9 @@ class PaymentGatewayResource extends Resource
                                     ->required(),
                             ])
                             ->columns(3),
-                    ]),
+                    ])
+                    ->collapsible()
+                    ->collapsed(fn($record) => $record),
             ]);
     }
 
