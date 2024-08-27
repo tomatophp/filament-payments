@@ -196,8 +196,20 @@ abstract class Driver
             $payment->save();
 
             if (!$isCancel) {
-                $user = Account::where('id', $payment->team->owner->id)->first();
-                $user->deposit($payment->final_amount);
+                $modelClass = $payment->model_type;
+                $model = $modelClass::find($payment->model_id);
+
+                if ($model instanceof Team) {
+                    $user = Account::where('id', $payment->team->owner->id)->first();
+
+                    if (method_exists($user, 'deposit')) {
+                        $user->deposit($payment->final_amount);
+                    }
+                } else {
+                    if (method_exists($model, 'deposit')) {
+                        $model->deposit($payment->final_amount);
+                    }
+                }
             }
 
             if ($isCancel) {

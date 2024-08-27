@@ -3,6 +3,7 @@
 namespace TomatoPHP\FilamentPayments\Livewire;
 
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use TomatoPHP\FilamentPayments\Models\Payment;
@@ -14,6 +15,8 @@ class PaymentProcess extends Component
     public $gateways;
     public $userIp;
     public $selectedGateway;
+    public $viewToRender;
+    public $data;
 
     public function mount($trx)
     {
@@ -54,7 +57,6 @@ class PaymentProcess extends Component
 
     public function process()
     {
-
         $this->validate([
             'selectedGateway' => 'required',
         ]);
@@ -85,14 +87,18 @@ class PaymentProcess extends Component
             'final_amount' => $this->payment->amount + $feeAmount,
         ]);
 
+<<<<<<< Updated upstream
         $dirName = $gateway->alias;
         $new = "TomatoPHP\\FilamentPayments\\Services\\Drivers\\{$dirName}";
+=======
+        $new = app(config('filament-payments.path') . "\\" . $gateway->alias);
+>>>>>>> Stashed changes
 
         $data = $new::process($this->payment);
-        $data = json_decode($data);
+        $this->data = json_decode($data);
 
-        if (isset($data->error)) {
-            Log::error($data->message);
+        if (isset($this->data->error)) {
+            Log::error($this->data->message);
 
             Notification::make()
                 ->title('Something is wrong try again later')
@@ -101,22 +107,28 @@ class PaymentProcess extends Component
             return;
         }
 
-        if (@$data->session) {
-            $this->payment->method_code = $data->session;
+        if (@$this->data->session) {
+            $this->payment->method_code = $this->data->session;
             $this->payment->save();
         }
 
-        if (isset($data->redirect)) {
-            return redirect($data->redirect);
+        if (isset($this->data->redirect)) {
+            return redirect($this->data->redirect);
+        } else {
+            $this->viewToRender = $this->data->view;
         }
-
-        $payment = $this->payment;
-
-        return view("$data->view", compact('data', 'payment'));
     }
 
     public function render()
     {
+        if ($this->viewToRender) {
+            return view($this->viewToRender)
+                ->with([
+                    'payment' => $this->payment,
+                    'data' => $this->data,
+                ]);
+        }
+    
         return view('filament-payments::livewire.payment-process')
             ->extends('filament-payments::layouts.payment')
             ->section('content');

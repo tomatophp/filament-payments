@@ -16,7 +16,7 @@
                     @endphp
 
                     <span class="text-lg font-semibold">{{ trans('filament-payments::messages.view.choose_payment_method') }}</span>
-                    <img src="../../flags/{{ strtolower($country) }}.svg" alt="Flag" width="24" height="24" />
+                    <img src="https://cdn.jsdelivr.net/gh/hampusborgos/country-flags@main/svg/{{ strtolower($country) }}.svg" alt="Flag" width="24" height="24" />
                 </div>
                 <div class="space-y-4">
                     @forelse ($gateways as $gateway)
@@ -62,11 +62,17 @@
         </div>
         <div class="bg-white rounded-lg shadow-md p-6 w-full md:w-1/3">
             <div class="flex flex-col items-center">
+<<<<<<< Updated upstream
 {{--                @if ($payment->model->getFirstMediaUrl('avatar'))--}}
 {{--                    <img src="{{ $payment->model->getFirstMediaUrl('avatar') }}" alt="Logo" class="mb-4"--}}
 {{--                        width="100" height="100" class="rounded-full"--}}
 {{--                        style="aspect-ratio: 100 / 100; object-fit: cover;" />--}}
 {{--                @endif--}}
+=======
+                @if(method_exists($payment->model, 'hasMedia') && $payment->model->hasMedia('avatar'))
+                    <img src="{{ $payment->model->getFirstMediaUrl('avatar') }}" alt="Logo" class="mb-4" width="100" height="100" class="rounded-full" style="aspect-ratio: 100 / 100; object-fit: cover;" />
+                @endif
+>>>>>>> Stashed changes
                 <h2 class="text-xl font-bold mb-2">{{ $payment->model->name }}</h2>
                 <h3 class="text-lg font-semibold mb-4">{{ $payment->detail }}</h3>
                 <div class="w-full border-t border-gray-200 my-4"></div>
