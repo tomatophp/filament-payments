@@ -87,6 +87,7 @@ class PaymentProcess extends Component
         $new = app(config('filament-payments.path'). "\\".$gateway->alias);
 
         $data = $new::process($this->payment);
+        dd($data);
         $data = json_decode($data);
 
         if (isset($data->error)) {

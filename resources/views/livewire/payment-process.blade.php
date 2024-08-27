@@ -4,9 +4,15 @@
             <form wire:submit.prevent="process">
                 <div class="flex items-center justify-between mb-6">
                     @php
-                        $response = Http::get("http://ip-api.com/json/{$userIp}");
-                        $data = $response->json();
-                        $country = $data['status'] == 'fail' ? 'none' : $data['countryCode'];
+                        if(!str($userIp)->contains('127.0.0.1')){
+                            $response = Http::get("http://ip-api.com/json/{$userIp}");
+                            $data = $response->json();
+                            $country = $data['status'] == 'fail' ? 'none' : $data['countryCode'];
+                        }
+                        else {
+                            $country = 'us';
+                        }
+
                     @endphp
 
                     <span class="text-lg font-semibold">{{ trans('filament-payments::messages.view.choose_payment_method') }}</span>
@@ -56,11 +62,11 @@
         </div>
         <div class="bg-white rounded-lg shadow-md p-6 w-full md:w-1/3">
             <div class="flex flex-col items-center">
-                @if ($payment->model->getFirstMediaUrl('avatar'))
-                    <img src="{{ $payment->model->getFirstMediaUrl('avatar') }}" alt="Logo" class="mb-4"
-                        width="100" height="100" class="rounded-full"
-                        style="aspect-ratio: 100 / 100; object-fit: cover;" />
-                @endif
+{{--                @if ($payment->model->getFirstMediaUrl('avatar'))--}}
+{{--                    <img src="{{ $payment->model->getFirstMediaUrl('avatar') }}" alt="Logo" class="mb-4"--}}
+{{--                        width="100" height="100" class="rounded-full"--}}
+{{--                        style="aspect-ratio: 100 / 100; object-fit: cover;" />--}}
+{{--                @endif--}}
                 <h2 class="text-xl font-bold mb-2">{{ $payment->model->name }}</h2>
                 <h3 class="text-lg font-semibold mb-4">{{ $payment->detail }}</h3>
                 <div class="w-full border-t border-gray-200 my-4"></div>

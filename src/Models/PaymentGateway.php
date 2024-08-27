@@ -44,9 +44,10 @@ class PaymentGateway extends Model implements HasMedia
     protected $casts = [
         'status' => 'boolean',
         'crypto' => 'boolean',
-        'gateway_parameters' => 'array',
-        'supported_currencies' => 'array',
-        'configurations' => 'array',
+        'name' => 'json',
+        'gateway_parameters' => 'json',
+        'supported_currencies' => 'json',
+        'configurations' => 'json',
         'sort_order' => 'integer',
     ];
 }

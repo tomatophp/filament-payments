@@ -86,7 +86,7 @@ class PaymentProcess extends Component
         ]);
 
         $dirName = $gateway->alias;
-        $new = "TomatoPHP\\FilamentPayments\\Http\\Controllers\\Gateway\\{$dirName}\\ProcessController";
+        $new = "TomatoPHP\\FilamentPayments\\Services\\Drivers\\{$dirName}";
 
         $data = $new::process($this->payment);
         $data = json_decode($data);

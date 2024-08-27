@@ -3,6 +3,8 @@
 namespace TomatoPHP\FilamentPayments;
 
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
+use TomatoPHP\FilamentPayments\Livewire\PaymentProcess;
 
 
 class FilamentPaymentsServiceProvider extends ServiceProvider
@@ -47,6 +49,8 @@ class FilamentPaymentsServiceProvider extends ServiceProvider
 
         //Register Routes
         $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
+
+        Livewire::component('payment-process',PaymentProcess::class);
 
     }
 

@@ -113,14 +113,10 @@ class PaymentGateway extends Page implements Tables\Contracts\HasTable
                             ->label(trans('filament-payments::messages.payment_gateways.sections.supported_currencies.title'))
                             ->schema([
                                 TextInput::make('currency')
-                                    ->disabled()
                                     ->columnSpanFull()
-                                    ->label(trans('filament-payments::messages.payment_gateways.sections.supported_currencies.columns.currency'))
-                                    ->required(),
+                                    ->label(trans('filament-payments::messages.payment_gateways.sections.supported_currencies.columns.currency')),
                                 TextInput::make('symbol')
-                                    ->disabled()
-                                    ->label(trans('filament-payments::messages.payment_gateways.sections.supported_currencies.columns.symbol'))
-                                    ->required(),
+                                    ->label(trans('filament-payments::messages.payment_gateways.sections.supported_currencies.columns.symbol')),
                                 TextInput::make('rate')
                                     ->label(trans('filament-payments::messages.payment_gateways.sections.supported_currencies.columns.rate'))
                                     ->required(),
@@ -141,7 +137,11 @@ class PaymentGateway extends Page implements Tables\Contracts\HasTable
                     ])
                     ->fillForm(fn($record) => $record->toArray())
                     ->action(function (array $data, $record){
-
+                        $record->update($data);
+                        Notification::make()
+                            ->title('Gateway Updated')
+                            ->body('Gateway has been updated successfully')
+                            ->send();
                     }),
             ])
             ->bulkActions([

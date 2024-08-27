@@ -31,8 +31,9 @@ class StripeV3 extends Driver
                 ]],
                 'mode' => 'payment',
                 'cancel_url' => route('payment.cancel', $payment->trx),
-                'success_url' => route('stripe-v3') . "?session={CHECKOUT_SESSION_ID}",
+                'success_url' => route('payments.callback', ['gateway' => $alias]) . "?session={CHECKOUT_SESSION_ID}",
             ]);
+
         } catch (\Exception $e) {
             $send['error'] = true;
             $send['message'] = $e->getMessage();
