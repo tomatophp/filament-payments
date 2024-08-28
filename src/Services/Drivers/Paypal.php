@@ -93,7 +93,7 @@ class Paypal extends Driver
         return PaymentGateway::make('Paypal')
             ->alias('Paypal')
             ->status(true)
-            ->crypto(true)
+            ->crypto(false)
             ->gateway_parameters([
                 "client_id" => "",
                 "secret" => "",
