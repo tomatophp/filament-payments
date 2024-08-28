@@ -46,6 +46,13 @@ Manage your payments inside FilamentPHP app with multi payment gateway integrati
 composer require tomatophp/filament-payments
 ```
 
+we need the Media Library plugin to be installed and migrated you can use this command to publish the migration
+
+```bash
+php artisan vendor:publish --provider="Spatie\MediaLibrary\MediaLibraryServiceProvider" --tag="medialibrary-migrations"
+```
+
+
 after install your package please run this command
 
 ```bash
