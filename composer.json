@@ -5,7 +5,14 @@
     "keywords": [
         "php",
         "laravel",
-        "template"
+        "payments",
+        "payment-gate",
+        "cacher",
+        "stripe",
+        "paypal",
+        "plisio",
+        "filament",
+        "tomatophp"
     ],
     "license": "MIT",
     "autoload": {

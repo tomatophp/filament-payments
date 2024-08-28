@@ -32,7 +32,7 @@ Manage your payments inside FilamentPHP app with multi payment gateway integrati
 - [x] Payment Drivers
 - [x] Strip3 Integration
 - [x] Plisio Integration
-- [ ] Paypal Integration
+- [x] Paypal Integration
 - [ ] Paymob Integration
 - [ ] PayTabs Integration
 - [ ] Tap Integration
