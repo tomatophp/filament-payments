@@ -17,7 +17,7 @@ Manage your payments inside FilamentPHP app with multi payment gateway integrati
 ![Edit Gate](https://raw.githubusercontent.com/tomatophp/filament-payments/master/arts/edit-gate.png)
 ![Gate Option](https://raw.githubusercontent.com/tomatophp/filament-payments/master/arts/gate-option.png)
 ![Payment Action](https://raw.githubusercontent.com/tomatophp/filament-payments/master/arts/payment-action.png)
-![Payment Action Confirm](https://raw.githubusercontent.com/tomatophp/filament-payments/master/arts/payment-action-confirm.png)
+![Payment Action Confirm](https://raw.githubusercontent.com/tomatophp/filament-payments/master/arts/action-confirm.png)
 
 ## Features
 
