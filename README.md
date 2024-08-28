@@ -35,7 +35,7 @@ Manage your payments inside FilamentPHP app with multi payment gateway integrati
 - [x] Paypal Integration
 - [x] Paymob Integration
 - [ ] PayTabs Integration
-- [ ] Tap Integration
+- [x] Tap Integration
 - [ ] Moyaser Integration
 - [ ] Payfort Integration
 - [ ] Fawery Integration
