@@ -14,6 +14,11 @@ class Plisio extends Driver
     {
         $gatewayData = $payment->gateway->gateway_parameters;
 
+        if(!$gatewayData['secret_key']){
+            $send['error'] = true;
+            $send['message'] = 'Plisio secret key is not set';
+            return json_encode($send);
+        }
         $plisioGateway = new \Plisio\PlisioSdkLaravel\Payment($gatewayData['secret_key']);
 
         try {

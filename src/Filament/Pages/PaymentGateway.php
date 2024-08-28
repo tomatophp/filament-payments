@@ -41,6 +41,12 @@ class PaymentGateway extends Page implements Tables\Contracts\HasTable
 
     public array $data = [];
 
+    public function getTitle(): string
+    {
+        return trans('filament-payments::messages.payment_gateways.title');
+    }
+
+
     public function mount(): void
     {
         FilamentPayments::loadDrivers();
@@ -52,14 +58,10 @@ class PaymentGateway extends Page implements Tables\Contracts\HasTable
             Action::make('back')
                 ->action(fn()=> redirect()->to(PaymentResource::getUrl('index')))
                 ->color('danger')
-                ->label("Back"),
+                ->label(trans('filament-payments::messages.payment_gateways.back')),
         ];
     }
 
-    public function getTitle(): string
-    {
-        return trans("Payment Gateway");
-    }
 
     public function table(Table $table): Table
     {
@@ -82,8 +84,8 @@ class PaymentGateway extends Page implements Tables\Contracts\HasTable
             ])
             ->actions([
                 Tables\Actions\Action::make('edit')
-                    ->label('Edit Gateway')
-                    ->tooltip('Edit Gateway')
+                    ->label(trans('filament-payments::messages.payment_gateways.edit'))
+                    ->tooltip(trans('filament-payments::messages.payment_gateways.edit'))
                     ->icon('heroicon-s-pencil')
                     ->iconButton()
                     ->form([

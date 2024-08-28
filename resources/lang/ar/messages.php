@@ -42,6 +42,8 @@ return [
     ],
     "payment_gateways" => [
         "title" => "بوابات الدفع",
+        "edit" => "تعديل بوابات الدفع",
+        "back" => "رجوع",
         "sections" => [
             "payment_gateway_data" => [
                 "title" => "بيانات بوابة الدفع",
@@ -109,6 +111,8 @@ return [
         ],
     ],
     "view" => [
+        "payment_action" => "دفع",
+        "error" => "خطأ!",
         'title_pay_page' => 'الدفع / بوابة الدفع',
         'choose_payment_method' => 'اختر طريقة الدفع',
         'no_gateways_available' => 'لا توجد بوابات متاحة',

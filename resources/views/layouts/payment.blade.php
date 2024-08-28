@@ -1,167 +1,114 @@
-<!DOCTYPE html>
+@props([
+    'livewire' => null,
+])
 
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-
+    <!DOCTYPE html>
+<html
+    lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+    dir="{{ __('filament-panels::layout.direction') ?? 'ltr' }}"
+    @class([
+        'fi min-h-screen',
+        'dark' => filament()->hasDarkModeForced(),
+    ])
+>
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="utf-8" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="{{ trans('filament-payments::messages.view.contact_us') }}">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{{url()->current()}}" />
     <title>{{ trans('filament-payments::messages.view.title_pay_page') }}</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    @filamentStyles
+    <meta property="og:type" content="@yield('type', 'website')" />
+    <meta property="og:title" content="{{ trans('filament-payments::messages.view.title_pay_page') }}" />
+    <meta property="og:description" content="{{ trans('filament-payments::messages.view.contact_us') }}" />
+    <meta property="og:image" content="{{ filament()->getBrandLogo() }}" />
+    <meta property="og:image:alt" content="{{ trans('filament-payments::messages.view.title_pay_page') }}" />
+    <meta property="og:url" content="{{url()->current()}}" />
+    <meta property="og:site_name" content="{{config('app.name')}}" />
 
-    <script src="https://unpkg.com/akar-icons-fonts"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="{{ trans('filament-payments::messages.view.title_pay_page') }}">
+    <meta name="twitter:description" content="{{ trans('filament-payments::messages.view.contact_us') }}">
+    <meta name="twitter:image" content="{{ filament()->getBrandLogo() }}">
+
+    @if ($favicon = filament()->getFavicon())
+        <link rel="icon" href="{{ $favicon }}" />
+    @endif
+
+    <title>
+        {{ filled($title = strip_tags(($livewire ?? null)?->getTitle() ?? '')) ? "{$title} - " : null }}
+        {{ strip_tags(filament()->getBrandName()) }}
+    </title>
+
 
     <style>
-        [x-cloak] {
+        [x-cloak=''],
+        [x-cloak='x-cloak'],
+        [x-cloak='1'] {
             display: none !important;
         }
 
-        .peer:checked~.group .peer-checked\:group\:bg-teal-600 {
-            background-color: #14B8A6;
-            border: none;
-        }
-
-        .peer:checked~.group .peer-checked\:group\:visible {
-            display: block;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        #payment-message {
-            color: rgb(105, 115, 134);
-            font-size: 16px;
-            line-height: 20px;
-            padding-top: 12px;
-            text-align: center;
-        }
-
-        #payment-element {
-            margin-bottom: 24px;
-        }
-
-        /* Buttons and links */
-        button {
-            background: #14B8A6;
-            font-family: Arial, sans-serif;
-            color: #ffffff;
-            border-radius: 4px;
-            border: 0;
-            padding: 12px 16px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            display: block;
-            transition: all 0.2s ease;
-            box-shadow: 0px 4px 5.5px 0px rgba(0, 0, 0, 0.07);
-            width: 100%;
-        }
-
-        button:hover {
-            filter: contrast(115%);
-        }
-
-        button:disabled {
-            opacity: 0.5;
-            cursor: default;
-        }
-
-        /* spinner/processing state, errors */
-        .spinner,
-        .spinner:before,
-        .spinner:after {
-            border-radius: 50%;
-        }
-
-        .spinner {
-            color: #ffffff;
-            font-size: 22px;
-            text-indent: -99999px;
-            margin: 0px auto;
-            position: relative;
-            width: 20px;
-            height: 20px;
-            box-shadow: inset 0 0 0 2px;
-            -webkit-transform: translateZ(0);
-            -ms-transform: translateZ(0);
-            transform: translateZ(0);
-        }
-
-        .spinner:before,
-        .spinner:after {
-            position: absolute;
-            content: "";
-        }
-
-        .spinner:before {
-            width: 10.4px;
-            height: 20.4px;
-            background: #5469d4;
-            border-radius: 20.4px 0 0 20.4px;
-            top: -0.2px;
-            left: -0.2px;
-            -webkit-transform-origin: 10.4px 10.2px;
-            transform-origin: 10.4px 10.2px;
-            -webkit-animation: loading 2s infinite ease 1.5s;
-            animation: loading 2s infinite ease 1.5s;
-        }
-
-        .spinner:after {
-            width: 10.4px;
-            height: 10.2px;
-            background: #14B8A6;
-            border-radius: 0 10.2px 10.2px 0;
-            top: -0.1px;
-            left: 10.2px;
-            -webkit-transform-origin: 0px 10.2px;
-            transform-origin: 0px 10.2px;
-            -webkit-animation: loading 2s infinite ease;
-            animation: loading 2s infinite ease;
-        }
-
-        @-webkit-keyframes loading {
-            0% {
-                -webkit-transform: rotate(0deg);
-                transform: rotate(0deg);
-            }
-
-            100% {
-                -webkit-transform: rotate(360deg);
-                transform: rotate(360deg);
+        @media (max-width: 1023px) {
+            [x-cloak='-lg'] {
+                display: none !important;
             }
         }
 
-        @keyframes loading {
-            0% {
-                -webkit-transform: rotate(0deg);
-                transform: rotate(0deg);
-            }
-
-            100% {
-                -webkit-transform: rotate(360deg);
-                transform: rotate(360deg);
-            }
-        }
-
-        @media only screen and (max-width: 600px) {
-            form {
-                width: 80vw;
-                min-width: initial;
+        @media (min-width: 1024px) {
+            [x-cloak='lg'] {
+                display: none !important;
             }
         }
     </style>
+
+    @filamentStyles
+
+    {{ filament()->getTheme()->getHtml() }}
+    {{ filament()->getFontHtml() }}
+
+    <style>
+        :root {
+            --font-family: '{!! filament()->getFontFamily() !!}';
+            --sidebar-width: {{ filament()->getSidebarWidth() }};
+            --collapsed-sidebar-width: {{ filament()->getCollapsedSidebarWidth() }};
+            --default-theme-mode: {{ filament()->getDefaultThemeMode()->value }};
+        }
+    </style>
+
+    @stack('styles')
+
+    @livewireStyles
 </head>
 
-<body class="bg-teal-50 antialiased">
-    {{-- Content --}}
-    @yield('content')
+<body
+    {{ $attributes
+            ->merge(($livewire ?? null)?->getExtraBodyAttributes() ?? [], escape: false)
+            ->class([
+                'fi-body',
+                'fi-panel-' . filament()->getId(),
+                'min-h-screen bg-gray-50 font-normal text-gray-950 antialiased dark:bg-gray-950 dark:text-white',
+            ]) }}
+>
 
-    @livewire('notifications')
+@livewire(Filament\Livewire\Notifications::class)
 
-    @filamentScripts
+{!! $content !!}
+
+@filamentScripts(withCore: true)
+
+@if (config('filament.broadcasting.echo'))
+    <script data-navigate-once>
+        window.Echo = new window.EchoFactory(@js(config('filament.broadcasting.echo')))
+
+        window.dispatchEvent(new CustomEvent('EchoLoaded'))
+    </script>
+@endif
+
+@stack('scripts')
+@stack('modals')
+
+@livewireScripts
 </body>
-
 </html>
