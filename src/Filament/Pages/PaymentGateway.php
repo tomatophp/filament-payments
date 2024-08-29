@@ -109,8 +109,6 @@ class PaymentGateway extends Page implements Tables\Contracts\HasTable
                             ->addable(false)
                             ->deletable(false),
                         Repeater::make('supported_currencies')
-                            ->addable(false)
-                            ->deletable(false)
                             ->reorderable(false)
                             ->label(trans('filament-payments::messages.payment_gateways.sections.supported_currencies.title'))
                             ->schema([

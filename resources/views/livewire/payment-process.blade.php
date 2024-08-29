@@ -11,14 +11,14 @@
             @if(auth()->check())
             <div class="flex items-center mt-6 gap-2">
                 <div>
-                    {{ trans('filament-subscriptions::messages.view.signed_in_as') }}
+                    {{ trans('filament-payments::messages.view.signed_in_as') }}
                 </div>
                 <div>
                     {{ auth()->user()->name }}.
                 </div>
             </div>
             <div class="text-sm">
-                {{ trans('filament-subscriptions::messages.view.managing_billing_for') }} {{ auth()->user()->name }}.
+                {{ trans('filament-payments::messages.view.managing_billing_for') }} {{ auth()->user()->name }}.
             </div>
             @endif
             <div class="mt-6">
@@ -50,7 +50,7 @@
 
         </div>
     </div>
-    <div class="w-full lg:flex-1 bg-gray-100 dark:bg-gray-800 h-full overflow-y-auto">
+    <div class="w-full lg:flex-1 bg-gray-100 dark:bg-gray-800 h-full sm:overflow-y-auto">
         <div class="px-4 my-4 flex flex-col gap-4 ">
 
             {{ $this->form }}

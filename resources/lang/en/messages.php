@@ -121,5 +121,7 @@ return [
         'total' => 'Total',
         'pay_now' => 'Pay Now',
         'contact_us' => 'If you encounter any issues with the payment process or do not receive the provided service, contact us directly',
+        'signed_in_as' => 'Signed in as',
+        'managing_billing_for' => 'Managing billing for',
     ]
 ];
