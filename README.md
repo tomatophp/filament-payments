@@ -35,6 +35,7 @@ Manage your payments inside FilamentPHP app with multi payment gateway integrati
 - [x] Paypal Integration
 - [x] Paymob Integration
 - [x] Tap Integration
+- [x] Myfatoorah Integration
 - [ ] Paddle Integration
 - [ ] Lemon Squeezy Integration
 - [ ] Binance Integration

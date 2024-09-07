@@ -45,6 +45,7 @@
         "stripe/stripe-php": "^15.4",
         "paypal/paypal-checkout-sdk": "^1.0",
         "plisio/plisio-sdk-laravel": "^1.0",
-        "filament/spatie-laravel-media-library-plugin": "^3.0"
+        "filament/spatie-laravel-media-library-plugin": "^3.0",
+        "myfatoorah/library": "^2.2"
     }
 }
