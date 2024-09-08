@@ -15,7 +15,7 @@ class FilamentPaymentsServices
     {
         // Define the validation rules
         $rules = [
-            'currency' => 'required|string|size:3|uppercase|exists:currencies,iso',
+            'currency' => 'required|string|size:3|uppercase',
             'model' => 'required|string',
             'model_id' => 'required|numeric',
             'amount' => 'required|numeric',

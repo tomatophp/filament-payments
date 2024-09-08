@@ -141,7 +141,18 @@ class PaymentProcess extends Component implements HasForms, HasActions
         ]);
 
         $dirName = $gateway->alias;
-        $new = "TomatoPHP\\FilamentPayments\\Services\\Drivers\\{$dirName}";
+        $drivers = config('filament-payments.drivers');
+        $new = false;
+        foreach ($drivers as $driver){
+            if(str($driver)->contains($dirName)){
+                $new = $driver;
+                break;
+            }
+        }
+        if(!$new){
+            $new = "TomatoPHP\\FilamentPayments\\Services\\Drivers\\{$dirName}";
+        }
+
 
         try {
             $data = $new::process($this->payment);
@@ -168,6 +179,7 @@ class PaymentProcess extends Component implements HasForms, HasActions
                 $this->viewToRender = $this->response->view;
             }
         }catch (\Exception $e) {
+            dd($e);
             Log::error($e->getMessage());
 
             Notification::make()
