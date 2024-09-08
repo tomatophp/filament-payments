@@ -15,6 +15,7 @@ class PaymentGateway extends Model implements HasMedia
 
     public $translatable = [
         'name',
+        'description',
     ];
 
     /**
@@ -45,6 +46,7 @@ class PaymentGateway extends Model implements HasMedia
         'status' => 'boolean',
         'crypto' => 'boolean',
         'name' => 'json',
+        'description' => 'json',
         'gateway_parameters' => 'json',
         'supported_currencies' => 'json',
         'configurations' => 'json',
