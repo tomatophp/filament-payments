@@ -198,7 +198,7 @@ class PaymentController extends Controller
                 break;
             }
         }
-        if(!$new){
+        if(!$gaywayClass){
             $gaywayClass = app(config('filament-payments.path') . "\\" . $gatway);
         }
 
