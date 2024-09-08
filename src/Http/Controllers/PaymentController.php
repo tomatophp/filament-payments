@@ -194,7 +194,7 @@ class PaymentController extends Controller
         $gaywayClass = false;
         foreach ($drivers as $driver){
             if(str($driver)->contains($gatway)){
-                $gaywayClass = $driver;
+                $gaywayClass = app($driver);
                 break;
             }
         }
