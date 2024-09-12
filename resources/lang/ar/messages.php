@@ -42,6 +42,8 @@ return [
     ],
     "payment_gateways" => [
         "title" => "بوابات الدفع",
+        "edit" => "تعديل بوابات الدفع",
+        "back" => "رجوع",
         "sections" => [
             "payment_gateway_data" => [
                 "title" => "بيانات بوابة الدفع",
@@ -109,6 +111,8 @@ return [
         ],
     ],
     "view" => [
+        "payment_action" => "دفع",
+        "error" => "خطأ!",
         'title_pay_page' => 'الدفع / بوابة الدفع',
         'choose_payment_method' => 'اختر طريقة الدفع',
         'no_gateways_available' => 'لا توجد بوابات متاحة',
@@ -117,5 +121,7 @@ return [
         'total' => 'الإجمالي',
         'pay_now' => 'ادفع الآن',
         'contact_us' => 'إذا واجهت أي مشاكل في عملية الدفع أو لم تستلم الخدمة المقدمة، اتصل بنا مباشرة',
+        'signed_in_as' => 'مسجل الدخول كـ',
+        'managing_billing_for' => 'إدارة الفواتير لـ',
     ]
 ];

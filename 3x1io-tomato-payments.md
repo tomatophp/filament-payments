@@ -10,5 +10,5 @@ github_repository: tomatophp/filament-payments
 has_dark_theme: true
 has_translations: true
 versions: [3]
-publish_date: 2024-08-21
+publish_date: 2024-08-28
 ---

@@ -41,6 +41,12 @@ class PaymentGateway extends Page implements Tables\Contracts\HasTable
 
     public array $data = [];
 
+    public function getTitle(): string
+    {
+        return trans('filament-payments::messages.payment_gateways.title');
+    }
+
+
     public function mount(): void
     {
         FilamentPayments::loadDrivers();
@@ -52,14 +58,10 @@ class PaymentGateway extends Page implements Tables\Contracts\HasTable
             Action::make('back')
                 ->action(fn()=> redirect()->to(PaymentResource::getUrl('index')))
                 ->color('danger')
-                ->label("Back"),
+                ->label(trans('filament-payments::messages.payment_gateways.back')),
         ];
     }
 
-    public function getTitle(): string
-    {
-        return trans("Payment Gateway");
-    }
 
     public function table(Table $table): Table
     {
@@ -82,8 +84,8 @@ class PaymentGateway extends Page implements Tables\Contracts\HasTable
             ])
             ->actions([
                 Tables\Actions\Action::make('edit')
-                    ->label('Edit Gateway')
-                    ->tooltip('Edit Gateway')
+                    ->label(trans('filament-payments::messages.payment_gateways.edit'))
+                    ->tooltip(trans('filament-payments::messages.payment_gateways.edit'))
                     ->icon('heroicon-s-pencil')
                     ->iconButton()
                     ->form([
@@ -107,20 +109,14 @@ class PaymentGateway extends Page implements Tables\Contracts\HasTable
                             ->addable(false)
                             ->deletable(false),
                         Repeater::make('supported_currencies')
-                            ->addable(false)
-                            ->deletable(false)
                             ->reorderable(false)
                             ->label(trans('filament-payments::messages.payment_gateways.sections.supported_currencies.title'))
                             ->schema([
                                 TextInput::make('currency')
-                                    ->disabled()
                                     ->columnSpanFull()
-                                    ->label(trans('filament-payments::messages.payment_gateways.sections.supported_currencies.columns.currency'))
-                                    ->required(),
+                                    ->label(trans('filament-payments::messages.payment_gateways.sections.supported_currencies.columns.currency')),
                                 TextInput::make('symbol')
-                                    ->disabled()
-                                    ->label(trans('filament-payments::messages.payment_gateways.sections.supported_currencies.columns.symbol'))
-                                    ->required(),
+                                    ->label(trans('filament-payments::messages.payment_gateways.sections.supported_currencies.columns.symbol')),
                                 TextInput::make('rate')
                                     ->label(trans('filament-payments::messages.payment_gateways.sections.supported_currencies.columns.rate'))
                                     ->required(),
@@ -141,7 +137,11 @@ class PaymentGateway extends Page implements Tables\Contracts\HasTable
                     ])
                     ->fillForm(fn($record) => $record->toArray())
                     ->action(function (array $data, $record){
-
+                        $record->update($data);
+                        Notification::make()
+                            ->title('Gateway Updated')
+                            ->body('Gateway has been updated successfully')
+                            ->send();
                     }),
             ])
             ->bulkActions([

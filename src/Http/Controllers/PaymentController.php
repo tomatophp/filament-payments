@@ -189,7 +189,20 @@ class PaymentController extends Controller
 
     public function verify(Request $request, string $gatway)
     {
-        $gaywayClass = app(config('filament-payments.path') . "\\" . $gatway);
+
+        $drivers = config('filament-payments.drivers');
+        $gaywayClass = false;
+        foreach ($drivers as $driver){
+            if(str($driver)->contains($gatway)){
+                $gaywayClass = app($driver);
+                break;
+            }
+        }
+        if(!$gaywayClass){
+            $gaywayClass = app(config('filament-payments.path') . "\\" . $gatway);
+        }
+
+
         return $gaywayClass->verify($request);
     }
 }

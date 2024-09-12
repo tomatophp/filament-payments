@@ -4,6 +4,7 @@ namespace TomatoPHP\FilamentPayments\Console;
 
 use Illuminate\Console\Command;
 use TomatoPHP\ConsoleHelpers\Traits\RunCommand;
+use TomatoPHP\FilamentPayments\Facades\FilamentPayments;
 
 class FilamentPaymentsInstall extends Command
 {
@@ -38,10 +39,9 @@ class FilamentPaymentsInstall extends Command
     {
         $this->info('Publish Vendor Assets');
         $this->callSilent('optimize:clear');
-        $this->yarnCommand(['install']);
-        $this->yarnCommand(['build']);
         $this->artisanCommand(["migrate"]);
         $this->artisanCommand(["optimize:clear"]);
-        $this->info('filamentPayments installed successfully.');
+        FilamentPayments::loadDrivers();
+        $this->info('Filament Payments installed successfully.');
     }
 }

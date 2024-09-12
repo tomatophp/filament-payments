@@ -2,18 +2,36 @@
 
 namespace TomatoPHP\FilamentPayments\Livewire;
 
+use Filament\Actions\Action;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Form;
 use Filament\Notifications\Notification;
+use Filament\Pages\Concerns\InteractsWithFormActions;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use TomatoPHP\FilamentPayments\Models\Payment;
 use TomatoPHP\FilamentPayments\Models\PaymentGateway;
 
-class PaymentProcess extends Component
+class PaymentProcess extends Component implements HasForms, HasActions
 {
+    use InteractsWithActions;
+    use InteractsWithFormActions;
+    use InteractsWithForms;
+
     public $payment;
     public $gateways;
     public $userIp;
     public $selectedGateway;
+    public $viewToRender;
+    public $data;
+    public $response;
+
 
     public function mount($trx)
     {
@@ -26,13 +44,51 @@ class PaymentProcess extends Component
             $supportedCurrencies = collect($gateway->supported_currencies);
             return $supportedCurrencies->contains('currency', $this->payment->method_currency);
         });
+
+        $this->form->fill([
+            'gateway' => $this->gateways->first()?->id,
+        ]);
+
+        $this->calculateFee();
+    }
+
+    public function form(Form $form): Form
+    {
+        return $form->schema([
+            Section::make(trans('filament-payments::messages.view.choose_payment_method'))
+                ->schema([
+                    Radio::make('gateway')
+                        ->default($this->gateways->first()?->id)
+                        ->live()
+                        ->hiddenLabel()
+                        ->afterStateUpdated(function (){
+                            $this->calculateFee();
+                        })
+                        ->descriptions($this->gateways->pluck('description', 'id')->toArray())
+                        ->options($this->gateways->pluck('name', 'id')->toArray())
+                        ->view('filament-payments::forms.radio', ['gateways' => $this->gateways])
+                        ->required(),
+                ])
+        ])->statePath('data');
+    }
+
+    public function paymentAction()
+    {
+        return Action::make('paymentAction')
+            ->icon('heroicon-o-credit-card')
+            ->label(trans('filament-payments::messages.view.choose_payment_method'))
+            ->action(function(){
+                $this->process();
+            });
     }
 
     public function calculateFee()
     {
-        if (!$this->selectedGateway) {
+        if (!$this->data['gateway']) {
             return;
         }
+
+        $this->selectedGateway = $this->data['gateway'];
 
         $selectedGateway = PaymentGateway::where('status', 1)->find($this->selectedGateway);
 
@@ -54,7 +110,6 @@ class PaymentProcess extends Component
 
     public function process()
     {
-
         $this->validate([
             'selectedGateway' => 'required',
         ]);
@@ -86,37 +141,64 @@ class PaymentProcess extends Component
         ]);
 
         $dirName = $gateway->alias;
-        $new = "TomatoPHP\\FilamentPayments\\Http\\Controllers\\Gateway\\{$dirName}\\ProcessController";
+        $drivers = config('filament-payments.drivers');
+        $new = false;
+        foreach ($drivers as $driver){
+            if(str($driver)->contains($dirName)){
+                $new = $driver;
+                break;
+            }
+        }
+        if(!$new){
+            $new = "TomatoPHP\\FilamentPayments\\Services\\Drivers\\{$dirName}";
+        }
 
-        $data = $new::process($this->payment);
-        $data = json_decode($data);
 
-        if (isset($data->error)) {
-            Log::error($data->message);
+        try {
+            $data = $new::process($this->payment);
+            $this->response = json_decode($data);
+
+            if (isset($this->response->error)) {
+                Log::error($this->response->message);
+
+                Notification::make()
+                    ->title('Something is wrong try again later')
+                    ->danger()
+                    ->send();
+                return;
+            }
+
+            if (@$this->response->session) {
+                $this->payment->method_code = $this->response->session;
+                $this->payment->save();
+            }
+
+            if (isset($this->response->redirect)) {
+                return redirect($this->response->redirect);
+            } else {
+                $this->viewToRender = $this->response->view;
+            }
+        }catch (\Exception $e) {
+            dd($e);
+            Log::error($e->getMessage());
 
             Notification::make()
                 ->title('Something is wrong try again later')
                 ->danger()
                 ->send();
-            return;
         }
-
-        if (@$data->session) {
-            $this->payment->method_code = $data->session;
-            $this->payment->save();
-        }
-
-        if (isset($data->redirect)) {
-            return redirect($data->redirect);
-        }
-
-        $payment = $this->payment;
-
-        return view("$data->view", compact('data', 'payment'));
     }
 
     public function render()
     {
+        if ($this->viewToRender) {
+            return view($this->viewToRender)
+                ->with([
+                    'payment' => $this->payment,
+                    'data' => $this->data,
+                ]);
+        }
+
         return view('filament-payments::livewire.payment-process')
             ->extends('filament-payments::layouts.payment')
             ->section('content');
