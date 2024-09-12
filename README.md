@@ -246,26 +246,4 @@ php artisan vendor:publish --tag="filament-payments-migrations"
 
 ## Other Filament Packages
 
-<<<<<<< HEAD
 Checkout our [Awesome TomatoPHP](https://github.com/tomatophp/awesome)
-=======
-## Docs
-
-you can check docs of this package on [Docs](https://docs.tomatophp.com/plugins/laravel-package-generator)
-
-## Changelog
-
-Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
-
-## Security
-
-Please see [SECURITY](SECURITY.md) for more information about security.
-
-## Credits
-
-- [Fady Mondy](mailto:info@3x1.io)
-
-## License
-
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
->>>>>>> 1334647ac6d894d6d1832b641f09918ee600c465
