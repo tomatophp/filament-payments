@@ -44,7 +44,6 @@ Manage your payments inside FilamentPHP app with multi payment gateway integrati
 - [ ] Moyaser Integration
 - [ ] Payfort Integration
 - [ ] Fawery Integration
->>>>>>> 1334647ac6d894d6d1832b641f09918ee600c465
 
 ## Installation
 
