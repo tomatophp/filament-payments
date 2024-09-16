@@ -1,0 +1,29 @@
+{
+    "name": "FilamentPayments",
+    "alias": "filament-payments",
+    "description": {
+        "ar": "قم بإدارة مدفوعاتك داخل تطبيق FilamentPHP مع تكامل بوابة الدفع المتعددة",
+        "en": "Manage your payments inside FilamentPHP app with multi payment gateway integration",
+        "gr": "Manage your payments inside FilamentPHP app with multi payment gateway integration",
+        "sp": "Manage your payments inside FilamentPHP app with multi payment gateway integration"
+    },
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "TomatoPHP\\FilamentPayments\\FilamentPaymentsServiceProvider"
+    ],
+    "files": [],
+    "title": {
+        "ar": "المدفوعات",
+        "en": "Payment Manager",
+        "gr": "Payment Manager",
+        "sp": "Payment Manager"
+    },
+    "color": "#cc1448",
+    "icon": "heroicon-c-credit-card",
+    "placeholder": "https://raw.githubusercontent.com/tomatophp/filament-payments/master/arts/3x1io-tomato-payments.jpg",
+    "type": "plugin",
+    "version": "v1.0.9",
+    "github" : "https://github.com/tomatophp/filament-payments",
+    "docs" : "https://github.com/tomatophp/filament-payments"
+}
