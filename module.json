@@ -23,7 +23,7 @@
     "icon": "heroicon-c-credit-card",
     "placeholder": "https://raw.githubusercontent.com/tomatophp/filament-payments/master/arts/3x1io-tomato-payments.jpg",
     "type": "plugin",
-    "version": "v1.0.9",
+    "version": "v1.0.10",
     "github" : "https://github.com/tomatophp/filament-payments",
     "docs" : "https://github.com/tomatophp/filament-payments"
 }
