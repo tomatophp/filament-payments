@@ -21,7 +21,7 @@ class FilamentPaymentsPlugin implements Plugin
     public function register(Panel $panel): void
     {
         if(class_exists(Module::class)){
-            if(\Nwidart\Modules\Facades\Module::find('FilamentPayments')->isEnabled()){
+            if(\Nwidart\Modules\Facades\Module::find('FilamentPayments')?->isEnabled()){
                 $this->isActive = true;
             }
         }
