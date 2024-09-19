@@ -46,6 +46,7 @@
         "paypal/paypal-checkout-sdk": "^1.0",
         "plisio/plisio-sdk-laravel": "^1.0",
         "filament/spatie-laravel-media-library-plugin": "^3.0",
-        "myfatoorah/library": "^2.2"
+        "myfatoorah/library": "^2.2",
+        "cryptomus/api-php-sdk": "^1.0"
     }
 }
