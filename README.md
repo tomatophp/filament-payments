@@ -214,6 +214,8 @@ public function boot(): void
     }
 ```
 
+it will redirect you to payment after the hook is called.
+
 ## Add Custom Payment Driver 
 
 you need to create a new class extends `TomatoPHP\FilamentPayments\Services\Drivers\Driver` like this
@@ -327,8 +329,6 @@ return [
 ];
 ```
 
-
-it will redirect you to payment after the hook is called.
 
 ## Publish Assets
 
