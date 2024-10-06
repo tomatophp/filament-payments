@@ -47,6 +47,7 @@
         "plisio/plisio-sdk-laravel": "^1.0",
         "filament/spatie-laravel-media-library-plugin": "^3.0",
         "myfatoorah/library": "^2.2",
-        "cryptomus/api-php-sdk": "^1.0"
+        "cryptomus/api-php-sdk": "^1.0",
+        "tomatophp/filament-translation-component": "^1.0"
     }
 }
