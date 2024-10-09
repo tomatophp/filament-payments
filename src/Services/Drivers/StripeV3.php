@@ -58,7 +58,7 @@ class StripeV3 extends Driver
 
         $session = \Stripe\Checkout\Session::retrieve($stripeSession);
 
-        $payment = Payment::where('method_code',  $session->id)->where('status', 0)->firstOrFail()();
+        $payment = Payment::where('method_code',  $session->id)->where('status', 0)->firstOrFail();
 
         if ($session->status === 'complete') {
 

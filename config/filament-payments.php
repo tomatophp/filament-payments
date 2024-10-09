@@ -2,7 +2,6 @@
 
 return [
     "drivers" => [
-        \TomatoPHP\FilamentPayments\Services\Drivers\Cryptomus::class,
         \TomatoPHP\FilamentPayments\Services\Drivers\Fawery::class,
         \TomatoPHP\FilamentPayments\Services\Drivers\Moyaser::class,
         \TomatoPHP\FilamentPayments\Services\Drivers\Payfort::class,

@@ -203,11 +203,11 @@ abstract class Driver
                     $user = Account::where('id', $payment->team->owner->id)->first();
 
                     if (method_exists($user, 'deposit')) {
-                        $user->depositFloat($payment->final_amount);
+                        $user->deposit($payment->final_amount);
                     }
                 } else {
                     if (method_exists($model, 'deposit')) {
-                        $model->depositFloat($payment->final_amount);
+                        $model->deposit($payment->final_amount);
                     }
                 }
             }
