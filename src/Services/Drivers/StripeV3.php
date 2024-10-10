@@ -23,7 +23,7 @@ class StripeV3 extends Driver
                         'unit_amount' => round($payment->amount + $payment->charge, 2) * 100,
                         'currency' => "$payment->method_currency",
                         'product_data' => [
-                            'name' => setting('site_name'),
+                            'name' => setting('site_name', config('app.name', 'Default Product Name')),
                             'description' => 'Payment with Stripe',
                         ]
                     ],
