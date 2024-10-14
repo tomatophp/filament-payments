@@ -97,9 +97,8 @@ class PaymentGateway extends Page implements Tables\Contracts\HasTable
                             ->label(trans('filament-payments::messages.payment_gateways.sections.payment_gateway_data.columns.name'))
                             ->required()
                             ->columnSpanFull(),
-                        Textarea::make('description')
+                        Translation::make('description')
                             ->label(trans('filament-payments::messages.payment_gateways.sections.payment_gateway_data.columns.description'))
-                            ->autosize()
                             ->columnSpanFull(),
                         KeyValue::make('gateway_parameters')
                             ->label(trans('filament-payments::messages.payment_gateways.sections.gateway_parameters_data.title'))
