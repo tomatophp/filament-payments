@@ -30,16 +30,16 @@ Manage your payments inside FilamentPHP app with multi payment gateway integrati
 - [x] Payment Facade Method
 - [x] Payment Page
 - [x] Payment Drivers
-- [x] Strip3 Integration
+- [x] StripeV3 Integration
 - [x] Plisio Integration
 - [x] Paypal Integration
 - [x] Paymob Integration
 - [x] Tap Integration
 - [x] Myfatoorah Integration
+- [x] Creptomus Integration
 - [ ] Paddle Integration
 - [ ] Lemon Squeezy Integration
 - [ ] Binance Integration
-- [ ] Creptomus Integration
 - [ ] PayTabs Integration
 - [ ] Moyaser Integration
 - [ ] Payfort Integration
