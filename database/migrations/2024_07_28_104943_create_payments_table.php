@@ -35,7 +35,7 @@ return new class extends Migration
 
             // Status and retry information
             $table->string('payment_try')->default(0);
-            $table->boolean('status')->default(0)->comment('0=>pending, 1=>success, 2=>cancel');
+            $table->smallInteger('status')->default(0)->comment('0=>pending, 1=>success, 2=>cancel');
             $table->boolean('from_api')->default(0);
 
             // URLs and feedback
