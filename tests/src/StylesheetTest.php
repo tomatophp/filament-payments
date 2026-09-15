@@ -13,6 +13,14 @@ it('registers the payments stylesheet with filament', function () {
     expect($styles)->toContain('filament-payments');
 });
 
+it('ships unlayered rules so the utilities outrank the panel reset', function () {
+    // Registered package styles load before Filament's app.css; a cascade layer declared here would
+    // rank below Filament's base layer and its reset would strip the checkout padding and headings.
+    $css = file_get_contents(__DIR__.'/../../resources/dist/filament-payments.css');
+
+    expect($css)->not->toContain('@layer');
+});
+
 it('ships every utility class the payment views use', function () {
     $css = file_get_contents(__DIR__.'/../../resources/dist/filament-payments.css');
 

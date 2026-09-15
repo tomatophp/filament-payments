@@ -2,10 +2,11 @@
  * tomatophp/filament-payments
  *
  * Filament v5 panels only ship the utilities Filament itself uses, so the checkout page, the gateway
- * radio list and the Stripe embedded form bring the few utilities they need. Everything lives in the
- * utilities layer so a host theme that already compiles these classes keeps full control.
+ * radio list and the Stripe embedded form bring the few utilities they need.
+ *
+ * The rules are deliberately not wrapped in a cascade layer: this file loads before Filament's app.css,
+ * so a layer declared here would rank below Filament's own layers and its reset would win.
  */
-@layer utilities {
     .hidden { display: none; }
     .flex { display: flex; }
     .inline-flex { display: inline-flex; }
@@ -97,4 +98,3 @@
     :where(.dark, .dark *) .dark\:text-white { color: #fff; }
     :where(.dark, .dark *) .dark\:text-gray-400 { color: var(--gray-400); }
     :where(.dark, .dark *) .dark\:border-gray-700 { border-color: var(--gray-700); }
-}
