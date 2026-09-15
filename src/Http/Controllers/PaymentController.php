@@ -8,7 +8,6 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
-use RuntimeException;
 use TomatoPHP\FilamentPayments\Models\Payment;
 use TomatoPHP\FilamentPayments\Services\Drivers\Driver;
 
@@ -75,13 +74,11 @@ class PaymentController extends Controller
 
         $validated = $validator->validated();
 
-        $team = Team::where('public_key', $validated['public_key'])->where('status', 1)->first();
-
         $team = Team::where('public_key', $validated['public_key'])->first();
 
         if (! $team) {
             return response()->json([
-                'error' => 'Invalid public key',
+                'error' => trans('filament-payments::messages.view.invalid_public_key'),
             ], 400);
         }
 
@@ -149,7 +146,7 @@ class PaymentController extends Controller
         if (! $team) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Team not found',
+                'message' => trans('filament-payments::messages.view.team_not_found'),
             ], 404);
         }
 
@@ -158,7 +155,7 @@ class PaymentController extends Controller
         if (! $payment) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Payment not found',
+                'message' => trans('filament-payments::messages.view.payment_not_found'),
             ], 404);
         }
 
@@ -193,23 +190,10 @@ class PaymentController extends Controller
 
     public function verify(Request $request, string $gateway)
     {
-        $drivers = config('filament-payments.drivers');
-        /**
-         * @var Driver $gatewayClass
-         */
-        $gatewayClass = null;
-        foreach ($drivers as $driver) {
-            if (str($driver)->contains($gateway)) {
-                $gatewayClass = $driver;
-                break;
-            }
-        }
-        if (! $gatewayClass) {
-            $gatewayClass = config('filament-payments.path').'\\'.$gateway;
-        }
+        $driver = Driver::resolve($gateway);
 
-        return class_exists($gatewayClass) ?
-            $gatewayClass::verify($request) :
-            throw new RuntimeException(trans('filament-payments::messages.view.driver_not_exists'), 500);
+        abort_if($driver === null, 404, trans('filament-payments::messages.view.driver_not_exists'));
+
+        return $driver::verify($request);
     }
 }

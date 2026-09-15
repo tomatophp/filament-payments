@@ -10,3 +10,4 @@ All notable changes to `filament-payments` will be documented in this file.
 - Payment gateway edit form, custom radio view and Livewire payment page ported to the Filament v5 schema APIs.
 - The payment controller no longer depends on the host app's `App\Http\Controllers\Controller`.
 - Added a Pest test suite (Testbench) and a GitHub Actions workflow.
+- Fixes on top of #14: the fee saved when a payment is processed is rounded too, PayPal amounts are sent as 2-decimal strings, unknown or abstract callback gateways return 404 instead of a 500, a verified payment no longer crashes when the paid model was deleted, and `pay/info` / `pay/initiate` are no longer shadowed by `pay/{trx}`.

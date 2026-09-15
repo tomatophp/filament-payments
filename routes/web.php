@@ -7,14 +7,17 @@ use TomatoPHP\FilamentSubscriptions\Http\Middleware\VerifyBillableIsSubscribed;
 
 Route::domain(config('filament-tenancy.central_domain'))->middleware(['web'])->group(function () {
     $route = Route::name('payment.')->prefix('pay')->middleware(['auth:'.config('filament-payments.guard')]);
-    if (class_exists('\\TomatoPHP\FilamentSubscriptions\\Http\\Middleware\\VerifyBillableIsSubscribed')) {
+
+    if (class_exists(VerifyBillableIsSubscribed::class)) {
         $route->withoutMiddleware([VerifyBillableIsSubscribed::class]);
     }
+
     $route->group(function () {
-        Route::get('{trx}', PaymentProcess::class)->name('index');
-        Route::get('{trx}/cancel', [PaymentController::class, 'cancel'])->name('cancel');
+        // Static paths first, otherwise `{trx}` swallows them.
         Route::post('initiate', [PaymentController::class, 'initiate'])->name('initiate');
         Route::get('info', [PaymentController::class, 'info'])->name('info');
+        Route::get('{trx}', PaymentProcess::class)->name('index');
+        Route::get('{trx}/cancel', [PaymentController::class, 'cancel'])->name('cancel');
     });
 
     Route::any('pay/callback/{gateway}', [PaymentController::class, 'verify'])->name('payments.callback');

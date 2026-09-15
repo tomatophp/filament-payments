@@ -105,14 +105,25 @@ class PaymentProcess extends Component implements HasActions, HasForms
             $currencyData = collect($supportedCurrencies)->firstWhere('currency', $currencyCode);
 
             if ($currencyData) {
-                $fixedFee = (float) $currencyData['fixed_charge'];
-                $percentageFee = (float) $currencyData['percent_charge'];
-                $feeAmount = round($fixedFee + ($this->payment->amount * $percentageFee / 100), 2);
+                $feeAmount = $this->calculateFeeAmount($currencyData);
 
                 $this->payment->charge = $feeAmount;
-                $this->payment->final_amount = $this->payment->amount + $feeAmount;
+                $this->payment->final_amount = round($this->payment->amount + $feeAmount, 2);
             }
         }
+    }
+
+    /**
+     * Gateway fee (fixed + percentage of the amount), rounded to 2 decimals.
+     *
+     * @param  array{fixed_charge: float|int|string, percent_charge: float|int|string}  $currencyData
+     */
+    protected function calculateFeeAmount(array $currencyData): float
+    {
+        $fixedFee = (float) $currencyData['fixed_charge'];
+        $percentageFee = (float) $currencyData['percent_charge'];
+
+        return round($fixedFee + ($this->payment->amount * $percentageFee / 100), 2);
     }
 
     public function process()
@@ -136,36 +147,29 @@ class PaymentProcess extends Component implements HasActions, HasForms
             return;
         }
 
-        $fixedFee = (float) $currencyData['fixed_charge'];
-        $percentageFee = (float) $currencyData['percent_charge'];
-        $feeAmount = $fixedFee + ($this->payment->amount * $percentageFee / 100);
+        $feeAmount = $this->calculateFeeAmount($currencyData);
 
         $this->payment->update([
             'method_id' => $this->selectedGateway,
             'method_name' => $gateway->name,
             'charge' => $feeAmount,
             'rate' => $currencyData['rate'],
-            'final_amount' => $this->payment->amount + $feeAmount,
+            'final_amount' => round($this->payment->amount + $feeAmount, 2),
         ]);
 
-        $dirName = $gateway->alias;
-        $drivers = config('filament-payments.drivers');
-        $new = null;
-        /**
-         * @var Driver $new
-         */
-        foreach ($drivers as $driver) {
-            if (str($driver)->contains($dirName)) {
-                $new = $driver;
-                break;
-            }
-        }
-        if (! $new) {
-            $new = "TomatoPHP\\FilamentPayments\\Services\\Drivers\\{$dirName}";
+        $driver = Driver::resolve((string) $gateway->alias);
+
+        if ($driver === null) {
+            Notification::make()
+                ->title(trans('filament-payments::messages.view.driver_not_exists'))
+                ->danger()
+                ->send();
+
+            return;
         }
 
         try {
-            $data = $new::process($this->payment);
+            $data = $driver::process($this->payment);
             $this->response = json_decode($data, false, 512, JSON_THROW_ON_ERROR);
 
             if (isset($this->response->error)) {

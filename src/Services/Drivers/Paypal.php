@@ -44,7 +44,7 @@ class Paypal extends Driver
                 [
                     'reference_id' => uniqid(),
                     'amount' => [
-                        'value' => round($payment->amount + $payment->charge, 2),
+                        'value' => self::formatAmount($payment->amount + $payment->charge),
                         'currency_code' => $payment->method_currency,
                     ],
                 ],
@@ -69,6 +69,14 @@ class Paypal extends Driver
         }
 
         return json_encode($send, JSON_THROW_ON_ERROR);
+    }
+
+    /**
+     * PayPal only accepts amounts as strings with at most two decimals, e.g. "10.83".
+     */
+    public static function formatAmount(float|int|string $amount): string
+    {
+        return number_format(round((float) $amount, 2), 2, '.', '');
     }
 
     public static function verify(Request $request): Application|RedirectResponse|Redirector

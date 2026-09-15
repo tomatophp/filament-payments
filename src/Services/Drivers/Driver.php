@@ -198,6 +198,33 @@ abstract class Driver
         ]);
     }
 
+    /**
+     * Resolve the driver class for a gateway alias such as "Paypal" (also used by the callback URL).
+     *
+     * @return class-string<Driver>|null
+     */
+    public static function resolve(string $alias): ?string
+    {
+        $drivers = collect(config('filament-payments.drivers', []));
+
+        $candidates = [
+            $drivers->first(fn (string $driver): bool => strcasecmp(class_basename($driver), $alias) === 0),
+            config('filament-payments.path').'\\'.$alias,
+            $drivers->first(fn (string $driver): bool => str($driver)->contains($alias)),
+        ];
+
+        foreach ($candidates as $driver) {
+            if (is_string($driver)
+                && class_exists($driver)
+                && is_subclass_of($driver, self::class)
+                && ! (new \ReflectionClass($driver))->isAbstract()) {
+                return $driver;
+            }
+        }
+
+        return null;
+    }
+
     public static function paymentDataUpdate(Payment $payment, bool $isCancel = false): void
     {
         if ($payment->status == 0) {
@@ -217,6 +244,9 @@ abstract class Driver
                  * we do not want to deposit the fee to the user too.
                  */
                 switch (true) {
+                    case $model === null:
+                        break;
+
                     case method_exists($model, 'depositFloat'):
                         $model->depositFloat($payment->amount, ['detail' => $payment->detail]);
                         break;
