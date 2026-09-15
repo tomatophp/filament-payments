@@ -2,31 +2,32 @@
     <div class="px-6 py-12 dark:bg-gray-950 dark:text-white shadow-sm h-screen">
         <div>
             <h1 class="text-3xl font-bold text-gray-900">
-                <x-filament-panels::logo  />
-                {{ env('APP_NAME', 'Laravel') }}
+                <x-filament-panels::logo/>
+                {{ config('app.name') }}
             </h1>
             <h2 class="text-lg font-semibold">
                 {{ trans('filament-payments::messages.view.title_pay_page') }}
             </h2>
             @if(auth()->check())
-            <div class="flex items-center mt-6 gap-2">
-                <div>
-                    {{ trans('filament-payments::messages.view.signed_in_as') }}
+                <div class="flex items-center mt-6 gap-2">
+                    <div>
+                        {{ trans('filament-payments::messages.view.signed_in_as') }}
+                    </div>
+                    <div>
+                        {{ auth()->user()->name }}.
+                    </div>
                 </div>
-                <div>
-                    {{ auth()->user()->name }}.
+                <div class="text-sm">
+                    {{ trans('filament-payments::messages.view.managing_billing_for') }} {{ auth()->user()->name }}.
                 </div>
-            </div>
-            <div class="text-sm">
-                {{ trans('filament-payments::messages.view.managing_billing_for') }} {{ auth()->user()->name }}.
-            </div>
             @endif
             <div class="mt-6">
                 {{ trans('filament-payments::messages.view.contact_us') }}
             </div>
             <div class="flex flex-col mt-6">
                 @if(method_exists($payment->model, 'hasMedia') && $payment->model->hasMedia('avatar'))
-                    <img src="{{ $payment->model->getFirstMediaUrl('avatar') }}" alt="Logo"  width="100" height="100" class="mb-4 rounded-full" style="aspect-ratio: 100 / 100; object-fit: cover;" />
+                    <img src="{{ $payment->model->getFirstMediaUrl('avatar') }}" alt="Logo" width="100" height="100"
+                         class="mb-4 rounded-full" style="aspect-ratio: 100 / 100; object-fit: cover;"/>
                 @endif
                 <h2 class="text-xl font-bold">{{ $payment->model->name }}</h2>
                 <h3 class="text-lg font-semibold">{{ $payment->detail }}</h3>
@@ -62,6 +63,6 @@
     </div>
 
 
-    <x-filament-actions::modals />
+    <x-filament-actions::modals/>
 </div>
 

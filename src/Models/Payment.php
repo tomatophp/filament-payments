@@ -31,6 +31,7 @@ use App\Models\Team;
  * @property array billing_info
  * @property string created_at
  * @property string updated_at
+ * @property PaymentGateway gateway
  *
  */
 class Payment extends Model

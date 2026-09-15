@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use TomatoPHP\FilamentPayments\Models\Payment;
 use TomatoPHP\FilamentPayments\Models\PaymentGateway;
+use TomatoPHP\FilamentPayments\Services\Drivers\Driver;
 
 class PaymentProcess extends Component implements HasForms, HasActions
 {
@@ -100,7 +101,7 @@ class PaymentProcess extends Component implements HasForms, HasActions
             if ($currencyData) {
                 $fixedFee = (float)$currencyData['fixed_charge'];
                 $percentageFee = (float)$currencyData['percent_charge'];
-                $feeAmount = $fixedFee + ($this->payment->amount * $percentageFee / 100);
+                $feeAmount = round($fixedFee + ($this->payment->amount * $percentageFee / 100), 2);
 
                 $this->payment->charge = $feeAmount;
                 $this->payment->final_amount = $this->payment->amount + $feeAmount;
@@ -122,7 +123,7 @@ class PaymentProcess extends Component implements HasForms, HasActions
 
         if (!$currencyData) {
             Notification::make()
-                ->title('Currency not supported')
+                ->title(trans('filament-payments::messages.view.currency_not_supported'))
                 ->danger()
                 ->send();
             return;
@@ -142,7 +143,10 @@ class PaymentProcess extends Component implements HasForms, HasActions
 
         $dirName = $gateway->alias;
         $drivers = config('filament-payments.drivers');
-        $new = false;
+        $new = null;
+        /**
+         * @var Driver $new
+         */
         foreach ($drivers as $driver){
             if(str($driver)->contains($dirName)){
                 $new = $driver;
@@ -156,13 +160,14 @@ class PaymentProcess extends Component implements HasForms, HasActions
 
         try {
             $data = $new::process($this->payment);
-            $this->response = json_decode($data);
+            $this->response = json_decode($data, false, 512, JSON_THROW_ON_ERROR);
 
             if (isset($this->response->error)) {
-                Log::error($this->response->message);
+                $title = trans('filament-payments::messages.view.gateway_error');
+                Log::error($title, ['error' => $this->response->message]);
 
                 Notification::make()
-                    ->title('Something is wrong try again later')
+                    ->title($title)
                     ->danger()
                     ->send();
                 return;
@@ -178,12 +183,11 @@ class PaymentProcess extends Component implements HasForms, HasActions
             } else {
                 $this->viewToRender = $this->response->view;
             }
-        }catch (\Exception $e) {
-            dd($e);
+        }catch (\Throwable $e) {
             Log::error($e->getMessage());
 
             Notification::make()
-                ->title('Something is wrong try again later')
+                ->title(trans('filament-payments::messages.view.gateway_error'))
                 ->danger()
                 ->send();
         }

@@ -3,7 +3,11 @@
 namespace TomatoPHP\FilamentPayments\Services\Drivers;
 
 use Exception;
+use Illuminate\Foundation\Application;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Redirector;
+use Illuminate\Support\Facades\Log;
 use PayPalCheckoutSdk\Core\PayPalHttpClient;
 use PayPalCheckoutSdk\Core\ProductionEnvironment;
 use PayPalCheckoutSdk\Core\SandboxEnvironment;
@@ -12,17 +16,22 @@ use PayPalCheckoutSdk\Orders\OrdersCreateRequest;
 use TomatoPHP\FilamentPayments\Models\Payment;
 use TomatoPHP\FilamentPayments\Services\Contracts\PaymentCurrency;
 use TomatoPHP\FilamentPayments\Services\Contracts\PaymentGateway;
+use TomatoPHP\FilamentPayments\Models\PaymentGateway as PaymentGatewayModel;
 
 class Paypal extends Driver
 {
+    /**
+     * @throws \JsonException
+     */
     public static function process(Payment $payment): false|string
     {
         $gatewayParameters = $payment->gateway->gateway_parameters;
 
-        if ($gatewayParameters['mode'] == "live")
+        if ($gatewayParameters['mode'] === "live") {
             $environment = new ProductionEnvironment($gatewayParameters['client_id'], $gatewayParameters['secret']);
-        else
+        } else {
             $environment = new SandboxEnvironment($gatewayParameters['client_id'], $gatewayParameters['secret']);
+        }
 
         $client = new PayPalHttpClient($environment);
 
@@ -30,62 +39,73 @@ class Paypal extends Driver
         $request->prefer('return=representation');
         $request->body = [
             "intent" => "CAPTURE",
-            "purchase_units" => [[
-                "reference_id" => uniqid(),
-                "amount" => [
-                    "value" => $payment->amount + $payment->charge,
-                    "currency_code" => $payment->method_currency
+            "purchase_units" => [
+                [
+                    "reference_id" => uniqid(),
+                    "amount" => [
+                        "value" => round($payment->amount + $payment->charge, 2),
+                        "currency_code" => $payment->method_currency
+                    ]
                 ]
-            ]],
+            ],
             "application_context" => [
-                "cancel_url" => route('payment.cancel', $payment->trx) . "?session=$payment->trx",
-                "return_url" => route('payments.callback', 'Paypal') . "?session=$payment->trx"
+                "cancel_url" => route('payment.cancel', $payment->trx)."?session=$payment->trx",
+                "return_url" => route('payments.callback', 'Paypal')."?session=$payment->trx"
             ]
         ];
 
+
         try {
-            $response = json_decode(json_encode($client->execute($request)), true);
+            $response = json_decode(
+                json_encode($client->execute($request), JSON_THROW_ON_ERROR), true, 512,
+                JSON_THROW_ON_ERROR
+            );
 
             $send['session'] = $response['result']['id'];
             $send['redirect'] = collect($response['result']['links'])->where('rel', 'approve')->firstOrFail()['href'];
-            return json_encode($send);
         } catch (Exception $e) {
             $send['error'] = true;
-            $send['message'] = $e;
-            return json_encode($send);
+            $send['message'] = $e->getMessage();
         }
+
+        return json_encode($send, JSON_THROW_ON_ERROR);
     }
 
-    public static function verify(Request $request): \Illuminate\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+    public static function verify(Request $request): Application|RedirectResponse|Redirector
     {
-        $gatewayData = \TomatoPHP\FilamentPayments\Models\PaymentGateway::where('alias', 'Paypal')->orderBy('id', 'desc')->firstOrFail();
+        $gatewayData = PaymentGatewayModel::where('alias', 'Paypal')->orderBy('id',
+            'desc')->firstOrFail();
         $gatewayParameter = $gatewayData->gateway_parameters;
 
         $sessionId = $request->get('session');
 
-        $payment = Payment::where('trx',  $sessionId)->where('status', 0)->firstOrFail();
+        $payment = Payment::where('trx', $sessionId)->where('status', 0)->firstOrFail();
 
-        if ($gatewayParameter['mode'] == "live")
+        if ($gatewayParameter['mode'] === "live") {
             $environment = new ProductionEnvironment($gatewayParameter['client_id'], $gatewayParameter['secret']);
-        else
+        } else {
             $environment = new SandboxEnvironment($gatewayParameter['client_id'], $gatewayParameter['secret']);
+        }
 
         $client = new PayPalHttpClient($environment);
 
+        $redirectTo = $payment->failed_url;
+
         try {
             $response = $client->execute(new OrdersCaptureRequest($request['token']));
-            $result = json_decode(json_encode($response), true);
-            if ($result['result']['status'] == "COMPLETED" && $result['statusCode'] == 201) {
+            $result = json_decode(json_encode($response, JSON_THROW_ON_ERROR), true, 512, JSON_THROW_ON_ERROR);
+            if ($result['result']['status'] === "COMPLETED" && $result['statusCode'] == 201) {
                 self::paymentDataUpdate($payment);
-                return redirect($payment->success_url);
+                $redirectTo = $payment->success_url;
             } else {
                 self::paymentDataUpdate($payment, true);
-                return redirect($payment->failed_url);
             }
         } catch (Exception $e) {
+            Log::error($e->getMessage(), ['exception' => $e]);
             self::paymentDataUpdate($payment, true);
-            return redirect($payment->failed_url);
         }
+
+        return redirect($redirectTo);
     }
 
     public function integration(): array

@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
+use TomatoPHP\FilamentPayments\Services\Drivers\Driver;
 
 class PaymentController extends Controller
 {
@@ -89,13 +90,13 @@ class PaymentController extends Controller
 
         if ($team->website !== $requestHost) {
             return response()->json([
-                'error' => 'Website does not match the request origin',
+                'error' => trans('filament-payments::messages.view.website_does_not_match'),
             ], 400);
         }
 
         if ($team->status === 1) {
             return response()->json([
-                'error' => 'Website is inactive'
+                'error' => trans('filament-payments::messages.view.website_is_inactive')
             ], 400);
         }
 
@@ -116,10 +117,14 @@ class PaymentController extends Controller
             'billing_info' => $validated['billing_info'] ?? [],
         ]);
 
-        return response()->json(['status' => 'success', 'message' => 'Payment created successfully', 'data' => [
-            'id' => $payment->trx,
-            'url' => route('payment.index', $payment->trx),
-        ]], 201);
+        return response()->json([
+            'status' => 'success',
+            'message' => trans('filament-payments::messages.view.payment_created_successfully'),
+            'data' => [
+                'id' => $payment->trx,
+                'url' => route('payment.index', $payment->trx),
+            ]
+        ], 201);
     }
 
     public function info(Request $request)
@@ -187,22 +192,25 @@ class PaymentController extends Controller
         ]);
     }
 
-    public function verify(Request $request, string $gatway)
+    public function verify(Request $request, string $gateway)
     {
-
         $drivers = config('filament-payments.drivers');
-        $gaywayClass = false;
-        foreach ($drivers as $driver){
-            if(str($driver)->contains($gatway)){
-                $gaywayClass = app($driver);
+        /**
+         * @var Driver $gatewayClass
+         */
+        $gatewayClass = null;
+        foreach ($drivers as $driver) {
+            if (str($driver)->contains($gateway)) {
+                $gatewayClass = $driver;
                 break;
             }
         }
-        if(!$gaywayClass){
-            $gaywayClass = app(config('filament-payments.path') . "\\" . $gatway);
+        if (!$gatewayClass) {
+            $gatewayClass = config('filament-payments.path')."\\".$gateway;
         }
 
-
-        return $gaywayClass->verify($request);
+        return class_exists($gatewayClass) ?
+            $gatewayClass::verify($request) :
+            throw new \RuntimeException(trans('filament-payments::messages.view.driver_not_exists'), 500);
     }
 }

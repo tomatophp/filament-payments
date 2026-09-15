@@ -40,7 +40,7 @@ class MyFatoorah extends Driver
             return json_encode($send);
         } catch (Exception $e) {
             $send['error'] = true;
-            $send['message'] = $e;
+            $send['message'] = $e->getMessage();
             return json_encode($send);
         }
     }

@@ -138,8 +138,8 @@ class PaymentGateway extends Page implements Tables\Contracts\HasTable
                     ->action(function (array $data, $record){
                         $record->update($data);
                         Notification::make()
-                            ->title('Gateway Updated')
-                            ->body('Gateway has been updated successfully')
+                            ->title(trans('filament-payments::messages.view.gateway_updated.title'))
+                            ->body(trans('filament-payments::messages.view.gateway_updated.body'))
                             ->send();
                     }),
             ])

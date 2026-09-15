@@ -13,5 +13,6 @@ return [
         \TomatoPHP\FilamentPayments\Services\Drivers\StripeV3::class,
         \TomatoPHP\FilamentPayments\Services\Drivers\Tap::class,
     ],
-    "path" => "TomatoPHP\\FilamentPayments\\Services\\Drivers"
+    "path" => "TomatoPHP\\FilamentPayments\\Services\\Drivers",
+    'guard' => config('auth.defaults.guard'),
 ];

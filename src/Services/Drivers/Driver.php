@@ -4,7 +4,10 @@ namespace TomatoPHP\FilamentPayments\Services\Drivers;
 
 use App\Models\Account;
 use App\Models\Team;
+use Illuminate\Foundation\Application;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
@@ -13,7 +16,9 @@ use TomatoPHP\FilamentPayments\Models\Payment;
 abstract class Driver
 {
     public static abstract function process(Payment $payment): false|string;
-    public static abstract function verify(Request $request): \Illuminate\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector;
+
+    public static abstract function verify(Request $request): Application|RedirectResponse|Redirector;
+
     public abstract function integration(): array;
 
     public static function cancel($trx)
@@ -77,13 +82,11 @@ abstract class Driver
 
         $validated = $validator->validated();
 
-        $team = Team::where('public_key', $validated['public_key'])->where('status', 1)->first();
-
         $team = Team::where('public_key', $validated['public_key'])->first();
 
         if (!$team) {
             return response()->json([
-                'error' => 'Invalid public key'
+                'error' => trans('filament-payments::messages.view.invalid_public_key'),
             ], 400);
         }
 
@@ -91,13 +94,13 @@ abstract class Driver
 
         if ($team->website !== $requestHost) {
             return response()->json([
-                'error' => 'Website does not match the request origin',
+                'error' => trans('filament-payments::messages.view.website_does_not_match'),
             ], 400);
         }
 
         if ($team->status === 1) {
             return response()->json([
-                'error' => 'Website is inactive'
+                'error' => trans('filament-payments::messages.view.website_is_inactive'),
             ], 400);
         }
 
@@ -118,10 +121,14 @@ abstract class Driver
             'billing_info' => $validated['billing_info'] ?? [],
         ]);
 
-        return response()->json(['status' => 'success', 'message' => 'Payment created successfully', 'data' => [
-            'id' => $payment->trx,
-            'url' => route('payment.index', $payment->trx),
-        ]], 201);
+        return response()->json([
+            'status' => 'success',
+            'message' => trans('filament-payments::messages.view.payment_created_successfully'),
+            'data' => [
+                'id' => $payment->trx,
+                'url' => route('payment.index', $payment->trx),
+            ]
+        ], 201);
     }
 
     public static function info(Request $request)
@@ -147,7 +154,7 @@ abstract class Driver
         if (!$team) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Team not found'
+                'message' => trans('filament-payments::messages.view.team_not_found'),
             ], 404);
         }
 
@@ -156,12 +163,10 @@ abstract class Driver
         if (!$payment) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Payment not found'
+                'message' => trans('filament-payments::messages.view.payment_not_found'),
             ], 404);
         }
-
-        $status = 'unknown';
-
+        
         switch ($payment->status) {
             case 0:
                 $status = 'processing';
@@ -171,6 +176,10 @@ abstract class Driver
                 break;
             case 2:
                 $status = 'cancelled';
+                break;
+
+            default:
+                $status = 'unknown';
                 break;
         }
 
@@ -189,33 +198,37 @@ abstract class Driver
         ]);
     }
 
-    public static function paymentDataUpdate($payment, $isCancel = false)
+    public static function paymentDataUpdate(Payment $payment, bool $isCancel = false): void
     {
         if ($payment->status == 0) {
             $payment->status = 1;
-            $payment->save();
 
             if (!$isCancel) {
                 $modelClass = $payment->model_type;
                 $model = $modelClass::find($payment->model_id);
 
                 if ($model instanceof Team) {
-                    $user = Account::where('id', $payment->team->owner->id)->first();
-
-                    if (method_exists($user, 'depositFloat')) {
-                        $user->depositFloat($payment->final_amount);
-                    }
-                } else {
-                    if (method_exists($model, 'depositFloat')) {
-                        $model->depositFloat($payment->final_amount);
-                    }
+                    $model = Account::where('id', $payment->team->owner->id)->first();
                 }
-            }
 
-            if ($isCancel) {
+                /**
+                 * @notice
+                 * Should deposit amount NOT final_amount (!!!!), final amount contains the Payment Gateway Fee,
+                 * we do not want to deposit the fee to the user too.
+                 */
+                switch (true) {
+                    case method_exists($model, 'depositFloat'):
+                        $model->depositFloat($payment->amount, ['detail' => $payment->detail]);
+                        break;
+
+                    case method_exists($model, 'deposit'):
+                        $model->deposit($payment->amount, ['detail' => $payment->detail]);
+                        break;
+                }
+            } else {
                 $payment->status = 2;
-                $payment->save();
             }
+            $payment->save();
         }
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'datetime_format' => 'd/m/Y h:iA',
     "title" => "المدفوعات",
     "payments" => [
         "title" => "المدفوعات",
@@ -19,7 +20,6 @@ return [
             "username" => "اسم المستخدم",
             "date" => "التاريخ",
             "transaction_number" => "رقم المعاملة",
-            "method_name" => "الطريقة",
             "method_code" => "رمز الطريقة",
             "charge" => "الرسوم",
             "rate" => "السعر",
@@ -123,5 +123,19 @@ return [
         'contact_us' => 'إذا واجهت أي مشاكل في عملية الدفع أو لم تستلم الخدمة المقدمة، اتصل بنا مباشرة',
         'signed_in_as' => 'مسجل الدخول كـ',
         'managing_billing_for' => 'إدارة الفواتير لـ',
+        //please translate it
+        'gateway_error' => 'Something is wrong try again later',
+        'gateway_updated' => [
+            'title' => 'Gateway Updated',
+            'body' => 'Gateway has been updated successfully',
+        ],
+        'currency_not_supported' => 'Currency not supported',
+        'website_does_not_match' => 'Website does not match the request origin',
+        'invalid_public_key' => 'Invalid public key',
+        'website_is_inactive' => 'Website is inactive',
+        'payment_created_successfully' => 'Payment created successfully',
+        'team_not_found' => 'Team not found',
+        'payment_not_found' => 'Payment not found',
+        'driver_not_exists' => 'Payment Driver not exists',
     ]
 ];

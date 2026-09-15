@@ -70,13 +70,17 @@ class PaymentResource extends Resource
                 TextColumn::make('amount')
                     ->label(trans('filament-payments::messages.payments.columns.amount'))
                     ->formatStateUsing(function (Payment $record) {
-                        return  Number::currency($record->amount, in: $record->method_currency) . " + " . Number::currency($record->charge, in: $record->method_currency) . '<br>' . Number::currency(($record->amount + $record->charge), in: $record->method_currency);
+                        return Number::currency($record->amount,
+                                in: $record->method_currency)." + ".Number::currency($record->charge,
+                                in: $record->method_currency).'<br>'.Number::currency(($record->amount + $record->charge),
+                                in: $record->method_currency);
                     })->html(),
 
                 TextColumn::make('rate')
                     ->label(trans('filament-payments::messages.payments.columns.conversion'))
                     ->formatStateUsing(function (Payment $record) {
-                        return  Number::currency(1, in: 'USD') . " = " . Number::currency($record->rate, in: $record->method_currency) . '<br>' . Number::currency($record->final_amount, in: 'USD');
+                        return Number::currency(1, in: 'USD')." = ".Number::currency($record->rate,
+                                in: $record->method_currency).'<br>'.Number::currency($record->final_amount, in: 'USD');
                     })->html(),
 
                 TextColumn::make('status')
@@ -103,8 +107,8 @@ class PaymentResource extends Resource
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->label(trans('filament-payments::messages.payments.columns.date'))
-                    ->dateTime('d/m/Y h:iA')
-                    ->description(fn ($record): string => Carbon::parse($record->created_at)->diffForHumans()),
+                    ->dateTime(trans('filament-payments::messages.datetime_format'))
+                    ->description(fn($record): string => Carbon::parse($record->created_at)->diffForHumans()),
             ])
             ->filters([
                 SelectFilter::make('status')
@@ -160,7 +164,7 @@ class PaymentResource extends Resource
                                     }),
                                 TextEntry::make('created_at')
                                     ->label(trans('filament-payments::messages.payments.columns.date'))
-                                    ->dateTime(),
+                                    ->dateTime(trans('filament-payments::messages.datetime_format')),
                                 TextEntry::make('trx')
                                     ->label(trans('filament-payments::messages.payments.columns.transaction_number')),
                                 TextEntry::make('account.username')
@@ -171,24 +175,24 @@ class PaymentResource extends Resource
                                     ->label(trans('filament-payments::messages.payments.columns.method_code')),
                                 TextEntry::make('amount')
                                     ->label(trans('filament-payments::messages.payments.columns.amount'))
-                                    ->money(function($record){
+                                    ->money(function ($record) {
                                         return $record->method_currency ?? 'USD';
                                     }, locale: 'en'),
                                 TextEntry::make('charge')
                                     ->label(trans('filament-payments::messages.payments.columns.charge'))
-                                    ->money(function($record){
+                                    ->money(function ($record) {
                                         return $record->method_currency ?? 'USD';
                                     }, locale: 'en'),
                                 TextEntry::make('rate')
                                     ->label(trans('filament-payments::messages.payments.columns.rate'))
                                     ->formatStateUsing(function (Payment $record) {
-                                        return Number::currency(1, in: 'USD') . " = " .
+                                        return Number::currency(1, in: 'USD')." = ".
                                             Number::currency($record->rate, in: $record->method_currency);
                                     })
                                     ->html(),
                                 TextEntry::make('final_amount')
                                     ->label(trans('filament-payments::messages.payments.columns.after_rate_conversion'))
-                                    ->money(function($record){
+                                    ->money(function ($record) {
                                         return $record->method_currency ?? 'USD';
                                     }, locale: 'en'),
                             ])
