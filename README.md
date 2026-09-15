@@ -10,14 +10,16 @@ Manage your payments inside FilamentPHP app with multi payment gateway integrati
 
 ## Screenshots
 
-![Payment Page](https://raw.githubusercontent.com/tomatophp/filament-payments/master/arts/payment-page.png)
-![Payments](https://raw.githubusercontent.com/tomatophp/filament-payments/master/arts/payments.png)
-![View Payment](https://raw.githubusercontent.com/tomatophp/filament-payments/master/arts/view.png)
-![Payment Gates](https://raw.githubusercontent.com/tomatophp/filament-payments/master/arts/payment-gates.png)
-![Edit Gate](https://raw.githubusercontent.com/tomatophp/filament-payments/master/arts/edit-gate.png)
-![Gate Option](https://raw.githubusercontent.com/tomatophp/filament-payments/master/arts/gate-option.png)
-![Payment Action](https://raw.githubusercontent.com/tomatophp/filament-payments/master/arts/payment-action.png)
-![Payment Action Confirm](https://raw.githubusercontent.com/tomatophp/filament-payments/master/arts/action-confirm.png)
+![Payments](https://raw.githubusercontent.com/tomatophp/filament-payments/master/arts/payments-light.png)
+![Payments Dark](https://raw.githubusercontent.com/tomatophp/filament-payments/master/arts/payments-dark.png)
+![View Payment](https://raw.githubusercontent.com/tomatophp/filament-payments/master/arts/view-payment-light.png)
+![View Payment Dark](https://raw.githubusercontent.com/tomatophp/filament-payments/master/arts/view-payment-dark.png)
+![Payment Gateways](https://raw.githubusercontent.com/tomatophp/filament-payments/master/arts/gateways-light.png)
+![Payment Gateways Dark](https://raw.githubusercontent.com/tomatophp/filament-payments/master/arts/gateways-dark.png)
+![Edit Gateway](https://raw.githubusercontent.com/tomatophp/filament-payments/master/arts/edit-gateway-light.png)
+![Edit Gateway Dark](https://raw.githubusercontent.com/tomatophp/filament-payments/master/arts/edit-gateway-dark.png)
+![Payment Page](https://raw.githubusercontent.com/tomatophp/filament-payments/master/arts/payment-page-light.png)
+![Payment Page Dark](https://raw.githubusercontent.com/tomatophp/filament-payments/master/arts/payment-page-dark.png)
 
 ## Features
 
