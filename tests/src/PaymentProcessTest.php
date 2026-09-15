@@ -29,9 +29,21 @@ it('serves the payment page over http', function () {
     createFakeGateway();
     $payment = createPayment($this->user);
 
-    $this->get(route('payment.index', $payment->trx))
+    $html = $this->get(route('payment.index', $payment->trx))
         ->assertSuccessful()
-        ->assertSee('Order #1001');
+        ->assertSee('Order #1001')
+        ->assertSee('filament-payments.css', false)
+        ->getContent();
+
+    // An HTML brand logo used to be echoed into meta attributes, leaking `" /> ">` onto the page.
+    $document = new DOMDocument;
+    @$document->loadHTML($html);
+
+    $headText = trim($document->getElementsByTagName('head')->item(0)?->textContent ?? '');
+
+    expect($html)->not->toContain('content="<img')
+        ->and($headText)->not->toContain('/>')
+        ->and($document->getElementsByTagName('body')->item(0)?->textContent ?? '')->not->toContain('" /> ">');
 });
 
 it('does not open the payment page for a completed payment', function () {

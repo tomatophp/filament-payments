@@ -2,6 +2,8 @@
 
 namespace TomatoPHP\FilamentPayments;
 
+use Filament\Support\Assets\Css;
+use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use TomatoPHP\FilamentPayments\Console\FilamentPaymentsInstall;
@@ -56,6 +58,11 @@ class FilamentPaymentsServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Filament v5 panels only compile Filament's own utilities; the payment views ship theirs.
+        FilamentAsset::register([
+            Css::make('filament-payments', __DIR__.'/../resources/dist/filament-payments.css'),
+        ], 'tomatophp/filament-payments');
+
         // Routes read `filament-payments.guard`, so they are loaded once every provider has registered its config.
         $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
 

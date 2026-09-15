@@ -23,7 +23,11 @@
     <meta property="og:type" content="@yield('type', 'website')" />
     <meta property="og:title" content="{{ trans('filament-payments::messages.view.title_pay_page') }}" />
     <meta property="og:description" content="{{ trans('filament-payments::messages.view.contact_us') }}" />
-    <meta property="og:image" content="{{ filament()->getBrandLogo() }}" />
+    {{-- The brand logo can be an HTML view; only a plain URL is valid inside a meta attribute. --}}
+    @php($brandLogoUrl = is_string($brandLogo = filament()->getBrandLogo()) ? $brandLogo : null)
+    @if ($brandLogoUrl)
+        <meta property="og:image" content="{{ $brandLogoUrl }}" />
+    @endif
     <meta property="og:image:alt" content="{{ trans('filament-payments::messages.view.title_pay_page') }}" />
     <meta property="og:url" content="{{url()->current()}}" />
     <meta property="og:site_name" content="{{config('app.name')}}" />
@@ -31,7 +35,9 @@
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="{{ trans('filament-payments::messages.view.title_pay_page') }}">
     <meta name="twitter:description" content="{{ trans('filament-payments::messages.view.contact_us') }}">
-    <meta name="twitter:image" content="{{ filament()->getBrandLogo() }}">
+    @if ($brandLogoUrl)
+        <meta name="twitter:image" content="{{ $brandLogoUrl }}">
+    @endif
 
     @if ($favicon = filament()->getFavicon())
         <link rel="icon" href="{{ $favicon }}" />

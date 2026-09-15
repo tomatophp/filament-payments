@@ -164,8 +164,9 @@ class PaymentResource extends Resource
                                     ->dateTime(trans('filament-payments::messages.datetime_format')),
                                 TextEntry::make('trx')
                                     ->label(trans('filament-payments::messages.payments.columns.transaction_number')),
-                                TextEntry::make('account.username')
-                                    ->label(trans('filament-payments::messages.payments.columns.username')),
+                                TextEntry::make('model.name')
+                                    ->label(trans('filament-payments::messages.payments.columns.username'))
+                                    ->state(fn (Payment $record): ?string => $record->model?->name),
                                 TextEntry::make('method_name')
                                     ->label(trans('filament-payments::messages.payments.columns.method_name')),
                                 TextEntry::make('method_code')

@@ -14,6 +14,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\HtmlString;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use TomatoPHP\FilamentPayments\FilamentPaymentsPlugin;
 
@@ -26,6 +27,8 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            // An HTML brand logo, as real apps often use; it must not leak into attributes.
+            ->brandLogo(fn () => new HtmlString('<img src="/images/logo.svg" alt="Logo" />'))
             ->pages([
                 Pages\Dashboard::class,
             ])

@@ -1,6 +1,7 @@
 <?php
 
 use Filament\Actions\Testing\TestAction;
+use Filament\Infolists\Components\TextEntry;
 use TomatoPHP\FilamentPayments\Filament\Resources\PaymentResource;
 use TomatoPHP\FilamentPayments\Filament\Resources\PaymentResource\Pages\ListPayments;
 use TomatoPHP\FilamentPayments\Tests\Models\User;
@@ -50,4 +51,17 @@ it('can view a payment', function () {
         ->assertSuccessful()
         ->assertSee($payment->trx)
         ->assertSee('Fake Gateway');
+});
+
+it('shows the paid model name as the payment username', function () {
+    $buyer = User::factory()->create(['name' => 'Acme Buyer']);
+    $payment = createPayment($buyer, ['status' => 1]);
+
+    livewire(ListPayments::class)
+        ->mountAction(TestAction::make('view')->table($payment))
+        ->assertSchemaComponentExists(
+            'model.name',
+            'mountedActionSchema0',
+            fn (TextEntry $entry): bool => $entry->getState() === 'Acme Buyer',
+        );
 });
