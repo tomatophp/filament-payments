@@ -15,11 +15,11 @@ use TomatoPHP\FilamentPayments\Models\Payment;
 
 abstract class Driver
 {
-    public static abstract function process(Payment $payment): false|string;
+    abstract public static function process(Payment $payment): false|string;
 
-    public static abstract function verify(Request $request): Application|RedirectResponse|Redirector;
+    abstract public static function verify(Request $request): Application|RedirectResponse|Redirector;
 
-    public abstract function integration(): array;
+    abstract public function integration(): array;
 
     public static function cancel($trx)
     {
@@ -76,7 +76,7 @@ abstract class Driver
         // Check if validation fails
         if ($validator->fails()) {
             return response()->json([
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -84,7 +84,7 @@ abstract class Driver
 
         $team = Team::where('public_key', $validated['public_key'])->first();
 
-        if (!$team) {
+        if (! $team) {
             return response()->json([
                 'error' => trans('filament-payments::messages.view.invalid_public_key'),
             ], 400);
@@ -127,7 +127,7 @@ abstract class Driver
             'data' => [
                 'id' => $payment->trx,
                 'url' => route('payment.index', $payment->trx),
-            ]
+            ],
         ], 201);
     }
 
@@ -143,7 +143,7 @@ abstract class Driver
         // Check if validation fails
         if ($validator->fails()) {
             return response()->json([
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -151,7 +151,7 @@ abstract class Driver
 
         $team = Team::where('public_key', $validated['public_key'])->first();
 
-        if (!$team) {
+        if (! $team) {
             return response()->json([
                 'status' => 'error',
                 'message' => trans('filament-payments::messages.view.team_not_found'),
@@ -160,13 +160,13 @@ abstract class Driver
 
         $payment = Payment::where('model_id', $team->id)->where('trx', $validated['id'])->first();
 
-        if (!$payment) {
+        if (! $payment) {
             return response()->json([
                 'status' => 'error',
                 'message' => trans('filament-payments::messages.view.payment_not_found'),
             ], 404);
         }
-        
+
         switch ($payment->status) {
             case 0:
                 $status = 'processing';
@@ -193,8 +193,8 @@ abstract class Driver
                 'cancel_url' => $payment->failed_url,
                 'customer' => $payment->customer,
                 'shipping_info' => $payment->shipping_info,
-                'billing_info' => $payment->billing_info
-            ]
+                'billing_info' => $payment->billing_info,
+            ],
         ]);
     }
 
@@ -203,7 +203,7 @@ abstract class Driver
         if ($payment->status == 0) {
             $payment->status = 1;
 
-            if (!$isCancel) {
+            if (! $isCancel) {
                 $modelClass = $payment->model_type;
                 $model = $modelClass::find($payment->model_id);
 

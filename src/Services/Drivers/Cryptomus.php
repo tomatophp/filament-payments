@@ -2,12 +2,15 @@
 
 namespace TomatoPHP\FilamentPayments\Services\Drivers;
 
-use Illuminate\Http\Request;
 use Cryptomus\Api\Client;
+use Exception;
+use Illuminate\Foundation\Application;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Redirector;
 use TomatoPHP\FilamentPayments\Models\Payment;
 use TomatoPHP\FilamentPayments\Services\Contracts\PaymentCurrency;
 use TomatoPHP\FilamentPayments\Services\Contracts\PaymentGateway;
-
 
 class Cryptomus extends Driver
 {
@@ -23,53 +26,58 @@ class Cryptomus extends Driver
                 'currency' => $payment->method_currency,
                 'order_id' => $payment->trx,
                 'url_return' => route('payment.cancel', $payment->trx),
-                'url_success' => route('payments.callback', 'Cryptomus') .  "?session=$payment->trx",
-                'url_callback' => route('payments.callback', 'Cryptomus') .  "?session=$payment->trx",
+                'url_success' => route('payments.callback', 'Cryptomus')."?session=$payment->trx",
+                'url_callback' => route('payments.callback', 'Cryptomus')."?session=$payment->trx",
                 'is_payment_multiple' => true,
                 'lifetime' => '3600',
                 'is_refresh' => true,
-                'course_source' => 'Binance'
+                'course_source' => 'Binance',
             ];
 
             $response = $cryptomusGateway->create($param);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $send['error'] = true;
             $send['message'] = $e->getMessage();
+
             return json_encode($send);
         }
-        
-        if ($response && $response['status'] == 'check' ) {
+
+        if ($response && $response['status'] == 'check') {
             $send['redirect'] = $response['url'];
             $send['session'] = $response['uuid'];
+
             return json_encode($send);
         } else {
             $send['error'] = true;
             $send['message'] = ['message'];
+
             return json_encode($send);
         }
     }
 
-    public static function verify(Request $request): \Illuminate\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+    public static function verify(Request $request): Application|RedirectResponse|Redirector
     {
         $gatewayData = \TomatoPHP\FilamentPayments\Models\PaymentGateway::where('alias', 'Cryptomus')->orderBy('id', 'desc')->firstOrFail();
         $gatewayParameter = $gatewayData->gateway_parameters;
 
-        $sessionId = $request->get('session');
+        $sessionId = $request->input('session');
 
-        $payment = Payment::where('trx',  $sessionId)->where('status', 0)->firstOrFail();
+        $payment = Payment::where('trx', $sessionId)->where('status', 0)->firstOrFail();
 
         $cryptomusGateway = Client::payment($gatewayParameter['payment_key'], $gatewayParameter['merchant_uuid']);
 
-        $data = ["order_id" => $sessionId];
+        $data = ['order_id' => $sessionId];
 
         $result = $cryptomusGateway->info($data);
 
         if ($result['is_final'] && $result['order_id'] && in_array($result['payment_status'], ['paid', 'paid_over'])) {
             self::paymentDataUpdate($payment);
+
             return redirect($payment->success_url);
         }
 
         self::paymentDataUpdate($payment, true);
+
         return redirect($payment->failed_url);
     }
 
@@ -80,8 +88,8 @@ class Cryptomus extends Driver
             ->status(true)
             ->crypto(true)
             ->gateway_parameters([
-                "payment_key" => "",
-                "merchant_uuid" => ""
+                'payment_key' => '',
+                'merchant_uuid' => '',
             ])
             ->supported_currencies([
                 PaymentCurrency::make('USD')
@@ -91,7 +99,7 @@ class Cryptomus extends Driver
                     ->maximum_amount(1000)
                     ->fixed_charge(0.2)
                     ->percent_charge(2)
-                    ->toArray()
+                    ->toArray(),
             ])
             ->toArray();
     }

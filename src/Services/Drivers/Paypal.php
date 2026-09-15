@@ -8,26 +8,27 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Log;
+use JsonException;
 use PayPalCheckoutSdk\Core\PayPalHttpClient;
 use PayPalCheckoutSdk\Core\ProductionEnvironment;
 use PayPalCheckoutSdk\Core\SandboxEnvironment;
 use PayPalCheckoutSdk\Orders\OrdersCaptureRequest;
 use PayPalCheckoutSdk\Orders\OrdersCreateRequest;
 use TomatoPHP\FilamentPayments\Models\Payment;
+use TomatoPHP\FilamentPayments\Models\PaymentGateway as PaymentGatewayModel;
 use TomatoPHP\FilamentPayments\Services\Contracts\PaymentCurrency;
 use TomatoPHP\FilamentPayments\Services\Contracts\PaymentGateway;
-use TomatoPHP\FilamentPayments\Models\PaymentGateway as PaymentGatewayModel;
 
 class Paypal extends Driver
 {
     /**
-     * @throws \JsonException
+     * @throws JsonException
      */
     public static function process(Payment $payment): false|string
     {
         $gatewayParameters = $payment->gateway->gateway_parameters;
 
-        if ($gatewayParameters['mode'] === "live") {
+        if ($gatewayParameters['mode'] === 'live') {
             $environment = new ProductionEnvironment($gatewayParameters['client_id'], $gatewayParameters['secret']);
         } else {
             $environment = new SandboxEnvironment($gatewayParameters['client_id'], $gatewayParameters['secret']);
@@ -35,25 +36,24 @@ class Paypal extends Driver
 
         $client = new PayPalHttpClient($environment);
 
-        $request = new OrdersCreateRequest();
+        $request = new OrdersCreateRequest;
         $request->prefer('return=representation');
         $request->body = [
-            "intent" => "CAPTURE",
-            "purchase_units" => [
+            'intent' => 'CAPTURE',
+            'purchase_units' => [
                 [
-                    "reference_id" => uniqid(),
-                    "amount" => [
-                        "value" => round($payment->amount + $payment->charge, 2),
-                        "currency_code" => $payment->method_currency
-                    ]
-                ]
+                    'reference_id' => uniqid(),
+                    'amount' => [
+                        'value' => round($payment->amount + $payment->charge, 2),
+                        'currency_code' => $payment->method_currency,
+                    ],
+                ],
             ],
-            "application_context" => [
-                "cancel_url" => route('payment.cancel', $payment->trx)."?session=$payment->trx",
-                "return_url" => route('payments.callback', 'Paypal')."?session=$payment->trx"
-            ]
+            'application_context' => [
+                'cancel_url' => route('payment.cancel', $payment->trx)."?session=$payment->trx",
+                'return_url' => route('payments.callback', 'Paypal')."?session=$payment->trx",
+            ],
         ];
-
 
         try {
             $response = json_decode(
@@ -77,11 +77,11 @@ class Paypal extends Driver
             'desc')->firstOrFail();
         $gatewayParameter = $gatewayData->gateway_parameters;
 
-        $sessionId = $request->get('session');
+        $sessionId = $request->input('session');
 
         $payment = Payment::where('trx', $sessionId)->where('status', 0)->firstOrFail();
 
-        if ($gatewayParameter['mode'] === "live") {
+        if ($gatewayParameter['mode'] === 'live') {
             $environment = new ProductionEnvironment($gatewayParameter['client_id'], $gatewayParameter['secret']);
         } else {
             $environment = new SandboxEnvironment($gatewayParameter['client_id'], $gatewayParameter['secret']);
@@ -94,7 +94,7 @@ class Paypal extends Driver
         try {
             $response = $client->execute(new OrdersCaptureRequest($request['token']));
             $result = json_decode(json_encode($response, JSON_THROW_ON_ERROR), true, 512, JSON_THROW_ON_ERROR);
-            if ($result['result']['status'] === "COMPLETED" && $result['statusCode'] == 201) {
+            if ($result['result']['status'] === 'COMPLETED' && $result['statusCode'] == 201) {
                 self::paymentDataUpdate($payment);
                 $redirectTo = $payment->success_url;
             } else {
@@ -115,9 +115,9 @@ class Paypal extends Driver
             ->status(true)
             ->crypto(false)
             ->gateway_parameters([
-                "client_id" => "",
-                "secret" => "",
-                "mode" => ""
+                'client_id' => '',
+                'secret' => '',
+                'mode' => '',
             ])
             ->supported_currencies([
                 PaymentCurrency::make('USD')

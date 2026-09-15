@@ -2,7 +2,6 @@
 
 namespace TomatoPHP\FilamentPayments\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -10,8 +9,8 @@ use Spatie\Translatable\HasTranslations;
 
 class PaymentGateway extends Model implements HasMedia
 {
-    use InteractsWithMedia;
     use HasTranslations;
+    use InteractsWithMedia;
 
     public $translatable = [
         'name',
@@ -34,7 +33,7 @@ class PaymentGateway extends Model implements HasMedia
         'description',
         'sort_order',
         'created_at',
-        'updated_at'
+        'updated_at',
     ];
 
     /**

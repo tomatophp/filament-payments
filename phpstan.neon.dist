@@ -1,0 +1,14 @@
+parameters:
+    level: 0
+    paths:
+        - src
+    # Type coverage (pulled in by pest-plugin-type-coverage) is a metric, not a level-0 correctness check.
+    type_coverage:
+        return_type: 0
+        param_type: 0
+        property_type: 0
+        constant_type: 0
+    ignoreErrors:
+        # The public payment API (initiate/info and team deposits) targets host apps that ship these models.
+        - '#unknown class App\\Models\\(Team|Account)#'
+        - '#Class App\\Models\\(Team|Account) not found#'

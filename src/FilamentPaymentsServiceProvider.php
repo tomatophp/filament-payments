@@ -4,60 +4,61 @@ namespace TomatoPHP\FilamentPayments;
 
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
+use TomatoPHP\FilamentPayments\Console\FilamentPaymentsInstall;
 use TomatoPHP\FilamentPayments\Livewire\PaymentProcess;
-
+use TomatoPHP\FilamentPayments\Services\FilamentPaymentsServices;
 
 class FilamentPaymentsServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //Register generate command
+        // Register generate command
         $this->commands([
-           \TomatoPHP\FilamentPayments\Console\FilamentPaymentsInstall::class,
+            FilamentPaymentsInstall::class,
         ]);
 
-        //Register Config file
+        // Register Config file
         $this->mergeConfigFrom(__DIR__.'/../config/filament-payments.php', 'filament-payments');
 
-        //Publish Config
+        // Publish Config
         $this->publishes([
-           __DIR__.'/../config/filament-payments.php' => config_path('filament-payments.php'),
+            __DIR__.'/../config/filament-payments.php' => config_path('filament-payments.php'),
         ], 'filament-payments-config');
 
-        //Register Migrations
+        // Register Migrations
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
 
-        //Publish Migrations
+        // Publish Migrations
         $this->publishes([
-           __DIR__.'/../database/migrations' => database_path('migrations'),
+            __DIR__.'/../database/migrations' => database_path('migrations'),
         ], 'filament-payments-migrations');
-        //Register views
+
+        // Register views
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'filament-payments');
 
-        //Publish Views
+        // Publish Views
         $this->publishes([
-           __DIR__.'/../resources/views' => resource_path('views/vendor/filament-payments'),
+            __DIR__.'/../resources/views' => resource_path('views/vendor/filament-payments'),
         ], 'filament-payments-views');
 
-        //Register Langs
+        // Register Langs
         $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'filament-payments');
 
-        //Publish Lang
+        // Publish Lang
         $this->publishes([
-           __DIR__.'/../resources/lang' => base_path('lang/vendor/filament-payments'),
+            __DIR__.'/../resources/lang' => base_path('lang/vendor/filament-payments'),
         ], 'filament-payments-lang');
 
-        //Register Routes
-        $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
-
-        Livewire::component('payment-process',PaymentProcess::class);
-
+        $this->app->bind('filament-payments', function () {
+            return new FilamentPaymentsServices;
+        });
     }
 
     public function boot(): void
     {
-        $this->app->bind('filament-payments', function () {
-            return new \TomatoPHP\FilamentPayments\Services\FilamentPaymentsServices();
-        });
+        // Routes read `filament-payments.guard`, so they are loaded once every provider has registered its config.
+        $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
+
+        Livewire::component('payment-process', PaymentProcess::class);
     }
 }

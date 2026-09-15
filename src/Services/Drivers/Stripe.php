@@ -2,7 +2,12 @@
 
 namespace TomatoPHP\FilamentPayments\Services\Drivers;
 
+use Exception;
+use Illuminate\Foundation\Application;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Redirector;
+use Stripe\PaymentIntent;
 use TomatoPHP\FilamentPayments\Models\Payment;
 use TomatoPHP\FilamentPayments\Services\Contracts\PaymentCurrency;
 use TomatoPHP\FilamentPayments\Services\Contracts\PaymentGateway;
@@ -15,16 +20,17 @@ class Stripe extends Driver
         \Stripe\Stripe::setApiKey($stripeData['secret_key']);
 
         try {
-            $session = \Stripe\PaymentIntent::create([
+            $session = PaymentIntent::create([
                 'amount' => round($payment->amount + $payment->charge, 2) * 100,
                 'currency' => "$payment->method_currency",
                 'automatic_payment_methods' => [
                     'enabled' => true,
                 ],
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $send['error'] = true;
             $send['message'] = $e->getMessage();
+
             return json_encode($send);
         }
 
@@ -36,19 +42,20 @@ class Stripe extends Driver
 
         $payment->method_code = json_decode(json_encode($session))->id;
         $payment->save();
+
         return json_encode($send);
     }
 
-    public static function verify(Request $request): \Illuminate\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+    public static function verify(Request $request): Application|RedirectResponse|Redirector
     {
         $StripeAcc = \TomatoPHP\FilamentPayments\Models\PaymentGateway::where('alias', 'Stripe')->orderBy('id', 'desc')->firstOrFail();
         $gateway_parameter = $StripeAcc->gateway_parameters;
 
         \Stripe\Stripe::setApiKey($gateway_parameter['secret_key']);
-        $stripeSession = $request->get('payment_intent');
-        $session = \Stripe\PaymentIntent::retrieve($stripeSession);
+        $stripeSession = $request->input('payment_intent');
+        $session = PaymentIntent::retrieve($stripeSession);
 
-        $payment = Payment::where('method_code',  $session->id)->where('status', 0)->firstOrFail();
+        $payment = Payment::where('method_code', $session->id)->where('status', 0)->firstOrFail();
 
         if ($session->status === 'succeeded') {
 
@@ -58,6 +65,7 @@ class Stripe extends Driver
         }
 
         self::paymentDataUpdate($payment, true);
+
         return redirect($payment->failed_url);
     }
 
@@ -68,8 +76,8 @@ class Stripe extends Driver
             ->status(true)
             ->crypto(false)
             ->gateway_parameters([
-                "secret_key" => "",
-                "publishable_key" => ""
+                'secret_key' => '',
+                'publishable_key' => '',
             ])
             ->supported_currencies([
                 PaymentCurrency::make('USD')
@@ -79,7 +87,7 @@ class Stripe extends Driver
                     ->maximum_amount(1000)
                     ->fixed_charge(0.2)
                     ->percent_charge(2)
-                    ->toArray()
+                    ->toArray(),
             ])
             ->toArray();
     }

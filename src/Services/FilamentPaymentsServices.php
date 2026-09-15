@@ -2,7 +2,6 @@
 
 namespace TomatoPHP\FilamentPayments\Services;
 
-use App\Models\Team;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use TomatoPHP\FilamentPayments\Models\Payment;
@@ -11,7 +10,7 @@ use TomatoPHP\FilamentPayments\Services\Contracts\PaymentRequest;
 
 class FilamentPaymentsServices
 {
-    public function pay(PaymentRequest $data, bool $json=false)
+    public function pay(PaymentRequest $data, bool $json = false)
     {
         // Define the validation rules
         $rules = [
@@ -55,20 +54,18 @@ class FilamentPaymentsServices
 
         // Check if validation fails
         if ($validator->fails()) {
-            if($json){
+            if ($json) {
                 return response()->json([
-                    'error' => $validator->errors()
+                    'error' => $validator->errors(),
                 ], 400);
-            }
-            else {
+            } else {
                 return [
-                    'error' => $validator->errors()
+                    'error' => $validator->errors(),
                 ];
             }
         }
 
         $validated = $validator->validated();
-
 
         // Create the Payment
         $payment = Payment::create([
@@ -87,17 +84,16 @@ class FilamentPaymentsServices
             'billing_info' => $validated['billing_info'] ?? [],
         ]);
 
-        if($json){
+        if ($json) {
             return response()->json([
                 'status' => 'success',
                 'message' => 'Payment created successfully',
                 'data' => [
                     'id' => $payment->trx,
                     'url' => route('payment.index', $payment->trx),
-                ]
+                ],
             ], 201);
-        }
-        else {
+        } else {
             return route('payment.index', $payment->trx);
         }
     }
@@ -105,15 +101,15 @@ class FilamentPaymentsServices
     public function loadDrivers(): void
     {
         $drivers = config('filament-payments.drivers');
-        foreach ($drivers as $driver){
+        foreach ($drivers as $driver) {
             $driver = app($driver);
             $paymentGate = $driver->integration();
-            if(isset($paymentGate['alias'])){
+            if (isset($paymentGate['alias'])) {
                 $payment = PaymentGateway::query()
                     ->where('alias', $paymentGate['alias'])
                     ->first();
 
-                if(!$payment){
+                if (! $payment) {
                     PaymentGateway::query()->create($paymentGate);
                 }
             }

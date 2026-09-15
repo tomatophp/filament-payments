@@ -29,7 +29,6 @@ class FilamentPaymentsInstall extends Command
         parent::__construct();
     }
 
-
     /**
      * Execute the console command.
      *
@@ -39,8 +38,8 @@ class FilamentPaymentsInstall extends Command
     {
         $this->info('Publish Vendor Assets');
         $this->callSilent('optimize:clear');
-        $this->artisanCommand(["migrate"]);
-        $this->artisanCommand(["optimize:clear"]);
+        $this->artisanCommand(['migrate']);
+        $this->artisanCommand(['optimize:clear']);
         FilamentPayments::loadDrivers();
         $this->info('Filament Payments installed successfully.');
     }

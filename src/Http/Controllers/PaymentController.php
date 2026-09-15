@@ -2,15 +2,14 @@
 
 namespace TomatoPHP\FilamentPayments\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\Account;
-use TomatoPHP\FilamentPayments\Models\Payment;
-use TomatoPHP\FilamentPayments\Models\PaymentGateway;
 use App\Models\Team;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
+use RuntimeException;
+use TomatoPHP\FilamentPayments\Models\Payment;
 use TomatoPHP\FilamentPayments\Services\Drivers\Driver;
 
 class PaymentController extends Controller
@@ -70,7 +69,7 @@ class PaymentController extends Controller
         // Check if validation fails
         if ($validator->fails()) {
             return response()->json([
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -80,9 +79,9 @@ class PaymentController extends Controller
 
         $team = Team::where('public_key', $validated['public_key'])->first();
 
-        if (!$team) {
+        if (! $team) {
             return response()->json([
-                'error' => 'Invalid public key'
+                'error' => 'Invalid public key',
             ], 400);
         }
 
@@ -96,7 +95,7 @@ class PaymentController extends Controller
 
         if ($team->status === 1) {
             return response()->json([
-                'error' => trans('filament-payments::messages.view.website_is_inactive')
+                'error' => trans('filament-payments::messages.view.website_is_inactive'),
             ], 400);
         }
 
@@ -123,7 +122,7 @@ class PaymentController extends Controller
             'data' => [
                 'id' => $payment->trx,
                 'url' => route('payment.index', $payment->trx),
-            ]
+            ],
         ], 201);
     }
 
@@ -139,7 +138,7 @@ class PaymentController extends Controller
         // Check if validation fails
         if ($validator->fails()) {
             return response()->json([
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -147,19 +146,19 @@ class PaymentController extends Controller
 
         $team = Team::where('public_key', $validated['public_key'])->first();
 
-        if (!$team) {
+        if (! $team) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Team not found'
+                'message' => 'Team not found',
             ], 404);
         }
 
         $payment = Payment::where('model_id', $team->id)->where('trx', $validated['id'])->first();
 
-        if (!$payment) {
+        if (! $payment) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Payment not found'
+                'message' => 'Payment not found',
             ], 404);
         }
 
@@ -187,8 +186,8 @@ class PaymentController extends Controller
                 'cancel_url' => $payment->failed_url,
                 'customer' => $payment->customer,
                 'shipping_info' => $payment->shipping_info,
-                'billing_info' => $payment->billing_info
-            ]
+                'billing_info' => $payment->billing_info,
+            ],
         ]);
     }
 
@@ -205,12 +204,12 @@ class PaymentController extends Controller
                 break;
             }
         }
-        if (!$gatewayClass) {
-            $gatewayClass = config('filament-payments.path')."\\".$gateway;
+        if (! $gatewayClass) {
+            $gatewayClass = config('filament-payments.path').'\\'.$gateway;
         }
 
         return class_exists($gatewayClass) ?
             $gatewayClass::verify($request) :
-            throw new \RuntimeException(trans('filament-payments::messages.view.driver_not_exists'), 500);
+            throw new RuntimeException(trans('filament-payments::messages.view.driver_not_exists'), 500);
     }
 }

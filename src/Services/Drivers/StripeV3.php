@@ -2,7 +2,13 @@
 
 namespace TomatoPHP\FilamentPayments\Services\Drivers;
 
+use Exception;
+use Illuminate\Foundation\Application;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Redirector;
+use Stripe\Checkout\Session;
+use Stripe\Stripe;
 use TomatoPHP\FilamentPayments\Models\Payment;
 use TomatoPHP\FilamentPayments\Services\Contracts\PaymentCurrency;
 use TomatoPHP\FilamentPayments\Services\Contracts\PaymentGateway;
@@ -13,10 +19,10 @@ class StripeV3 extends Driver
     {
         $stripeData = $payment->gateway->gateway_parameters;
         $alias = $payment->gateway->alias;
-        \Stripe\Stripe::setApiKey($stripeData['secret_key']);
+        Stripe::setApiKey($stripeData['secret_key']);
 
         try {
-            $session = \Stripe\Checkout\Session::create([
+            $session = Session::create([
                 'payment_method_types' => ['card'],
                 'line_items' => [[
                     'price_data' => [
@@ -25,18 +31,19 @@ class StripeV3 extends Driver
                         'product_data' => [
                             'name' => config('app.name', 'Default Product Name'),
                             'description' => 'Payment with Stripe',
-                        ]
+                        ],
                     ],
                     'quantity' => 1,
                 ]],
                 'mode' => 'payment',
                 'cancel_url' => route('payment.cancel', $payment->trx),
-                'success_url' => route('payments.callback', ['gateway' => $alias]) . "?session={CHECKOUT_SESSION_ID}",
+                'success_url' => route('payments.callback', ['gateway' => $alias]).'?session={CHECKOUT_SESSION_ID}',
             ]);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $send['error'] = true;
             $send['message'] = $e->getMessage();
+
             return json_encode($send);
         }
 
@@ -45,20 +52,21 @@ class StripeV3 extends Driver
         $send['publishable_key'] = $stripeData['publishable_key'];
         $payment->method_code = json_decode(json_encode($session))->id;
         $payment->save();
+
         return json_encode($send);
     }
 
-    public static function verify(Request $request): \Illuminate\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+    public static function verify(Request $request): Application|RedirectResponse|Redirector
     {
         $StripeAcc = \TomatoPHP\FilamentPayments\Models\PaymentGateway::where('alias', 'StripeV3')->orderBy('id', 'desc')->firstOrFail();
         $gateway_parameter = $StripeAcc->gateway_parameters;
 
-        \Stripe\Stripe::setApiKey($gateway_parameter['secret_key']);
-        $stripeSession = $request->get('session');
+        Stripe::setApiKey($gateway_parameter['secret_key']);
+        $stripeSession = $request->input('session');
 
-        $session = \Stripe\Checkout\Session::retrieve($stripeSession);
+        $session = Session::retrieve($stripeSession);
 
-        $payment = Payment::where('method_code',  $session->id)->where('status', 0)->firstOrFail();
+        $payment = Payment::where('method_code', $session->id)->where('status', 0)->firstOrFail();
 
         if ($session->status === 'complete') {
 
@@ -68,6 +76,7 @@ class StripeV3 extends Driver
         }
 
         self::paymentDataUpdate($payment, true);
+
         return redirect($payment->failed_url);
     }
 
@@ -78,8 +87,8 @@ class StripeV3 extends Driver
             ->status(true)
             ->crypto(false)
             ->gateway_parameters([
-                "secret_key" => "",
-                "publishable_key" => ""
+                'secret_key' => '',
+                'publishable_key' => '',
             ])
             ->supported_currencies([
                 PaymentCurrency::make('USD')
@@ -89,9 +98,8 @@ class StripeV3 extends Driver
                     ->maximum_amount(1000)
                     ->fixed_charge(0.2)
                     ->percent_charge(2)
-                    ->toArray()
+                    ->toArray(),
             ])
             ->toArray();
     }
-
 }

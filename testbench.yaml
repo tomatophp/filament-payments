@@ -1,0 +1,29 @@
+providers:
+  - BladeUI\Icons\BladeIconsServiceProvider
+  - BladeUI\Heroicons\BladeHeroiconsServiceProvider
+  - Filament\Actions\ActionsServiceProvider
+  - Filament\FilamentServiceProvider
+  - Filament\Forms\FormsServiceProvider
+  - Filament\Infolists\InfolistsServiceProvider
+  - Filament\Notifications\NotificationsServiceProvider
+  - Filament\Support\SupportServiceProvider
+  - Filament\Tables\TablesServiceProvider
+  - Filament\Widgets\WidgetsServiceProvider
+  - Filament\Schemas\SchemasServiceProvider
+  - RyanChandler\BladeCaptureDirective\BladeCaptureDirectiveServiceProvider
+  - Spatie\MediaLibrary\MediaLibraryServiceProvider
+  - Spatie\Translatable\TranslatableServiceProvider
+  - TomatoPHP\FilamentTranslationComponent\FilamentTranslationComponentServiceProvider
+  - TomatoPHP\FilamentPayments\FilamentPaymentsServiceProvider
+  - TomatoPHP\FilamentPayments\Tests\AdminPanelProvider
+
+workbench:
+  welcome: true
+  install: true
+  start: /
+  guard: testing
+  discovers:
+    web: true
+    api: false
+    commands: false
+    views: true

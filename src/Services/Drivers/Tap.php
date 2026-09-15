@@ -2,8 +2,12 @@
 
 namespace TomatoPHP\FilamentPayments\Services\Drivers;
 
+use Illuminate\Foundation\Application;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Http;
+use Throwable;
 use TomatoPHP\FilamentPayments\Models\Payment;
 use TomatoPHP\FilamentPayments\Services\Contracts\PaymentCurrency;
 use TomatoPHP\FilamentPayments\Services\Contracts\PaymentGateway;
@@ -22,67 +26,70 @@ class Tap extends Driver
 
         $unique_id = uniqid();
         $response = Http::withHeaders([
-            "authorization" => "Bearer " . $gatewayParameters['secret_key'],
-            "Content-Type" => "application/json",
-            'lang_code' => $gatewayParameters['lang_code']
+            'authorization' => 'Bearer '.$gatewayParameters['secret_key'],
+            'Content-Type' => 'application/json',
+            'lang_code' => $gatewayParameters['lang_code'],
         ])->post('https://api.tap.company/v2/charges', [
-            "amount" => $payment->amount + $payment->charge,
-            "currency" => $payment->method_currency,
-            "threeDSecure" => true,
-            "save_card" => false,
-            "description" => "Cerdit",
-            "statement_descriptor" => "Cerdit",
-            "reference" => [
-                "transaction" => $unique_id,
-                "order" => $unique_id
+            'amount' => $payment->amount + $payment->charge,
+            'currency' => $payment->method_currency,
+            'threeDSecure' => true,
+            'save_card' => false,
+            'description' => 'Cerdit',
+            'statement_descriptor' => 'Cerdit',
+            'reference' => [
+                'transaction' => $unique_id,
+                'order' => $unique_id,
             ],
-            "receipt" => [
-                "email" => true,
-                "sms" => true
+            'receipt' => [
+                'email' => true,
+                'sms' => true,
             ],
-            "customer" => [
-                "first_name" => $firstName,
-                "middle_name" => "",
-                "last_name" => $lastName,
-                "email" => $payment->customer['email'],
-                "phone" => [
-                    "country_code" => "20",
-                    "number" => $payment->customer['mobile']
-                ]
+            'customer' => [
+                'first_name' => $firstName,
+                'middle_name' => '',
+                'last_name' => $lastName,
+                'email' => $payment->customer['email'],
+                'phone' => [
+                    'country_code' => '20',
+                    'number' => $payment->customer['mobile'],
+                ],
             ],
-            "source" => ["id" => "src_all"],
-            "post" => ["url" => route('payments.callback', 'Tap') . "?session=$payment->trx"],
-            "redirect" => ["url" => route('payments.callback', 'Tap') . "?session=$payment->trx"]
+            'source' => ['id' => 'src_all'],
+            'post' => ['url' => route('payments.callback', 'Tap')."?session=$payment->trx"],
+            'redirect' => ['url' => route('payments.callback', 'Tap')."?session=$payment->trx"],
         ])->json();
 
         try {
             $send['session'] = $response['id'];
             $send['redirect'] = $response['transaction']['url'];
+
             return json_encode($send);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             return $response;
         }
     }
 
-    public static function verify(Request $request): \Illuminate\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+    public static function verify(Request $request): Application|RedirectResponse|Redirector
     {
         $gatewayData = \TomatoPHP\FilamentPayments\Models\PaymentGateway::where('alias', 'Tap')->orderBy('id', 'desc')->firstOrFail();
         $gatewayParameter = $gatewayData->gateway_parameters;
 
-        $sessionId = $request->get('session');
+        $sessionId = $request->input('session');
 
-        $payment = Payment::where('trx',  $sessionId)->where('status', 0)->firstOrFail();
+        $payment = Payment::where('trx', $sessionId)->where('status', 0)->firstOrFail();
 
         $response = Http::withHeaders([
-            "Authorization" => "Bearer " . $gatewayParameter['secret_key'],
-            "Content-Type" => "application/json",
-        ])->get('https://api.tap.company/v2/charges/' . $request->tap_id)->json();
+            'Authorization' => 'Bearer '.$gatewayParameter['secret_key'],
+            'Content-Type' => 'application/json',
+        ])->get('https://api.tap.company/v2/charges/'.$request->tap_id)->json();
 
-        if (isset($response['status']) && $response['status'] == "CAPTURED") {
+        if (isset($response['status']) && $response['status'] == 'CAPTURED') {
             self::paymentDataUpdate($payment);
+
             return redirect($payment->success_url);
         } else {
             self::paymentDataUpdate($payment, true);
+
             return redirect($payment->failed_url);
         }
     }
@@ -94,9 +101,9 @@ class Tap extends Driver
             ->status(true)
             ->crypto(false)
             ->gateway_parameters([
-                "secret_key" => "",
-                "public_key" => "",
-                "lang_code" => ""
+                'secret_key' => '',
+                'public_key' => '',
+                'lang_code' => '',
             ])
             ->supported_currencies([
                 PaymentCurrency::make('USD')

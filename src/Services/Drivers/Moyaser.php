@@ -2,7 +2,10 @@
 
 namespace TomatoPHP\FilamentPayments\Services\Drivers;
 
+use Illuminate\Foundation\Application;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Redirector;
 use TomatoPHP\FilamentPayments\Models\Payment;
 
 class Moyaser extends Driver
@@ -12,7 +15,7 @@ class Moyaser extends Driver
         return false;
     }
 
-    public static function verify(Request $request): \Illuminate\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+    public static function verify(Request $request): Application|RedirectResponse|Redirector
     {
         return redirect()->to('/');
     }

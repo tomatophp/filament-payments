@@ -2,31 +2,28 @@
 
 namespace TomatoPHP\FilamentPayments\Filament\Pages;
 
-
+use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
-use Filament\Forms;
 use Filament\Notifications\Notification;
-use Filament\Pages\Actions\Action;
 use Filament\Pages\Page;
-use Filament\Pages\SettingsPage;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
-use Filament\Tables;
-use Illuminate\Database\Eloquent\Model;
-use TomatoPHP\FilamentIcons\Components\IconPicker;
 use TomatoPHP\FilamentPayments\Facades\FilamentPayments;
 use TomatoPHP\FilamentPayments\Filament\Resources\PaymentResource;
 use TomatoPHP\FilamentPayments\Models\PaymentGateway as PaymentGatewayModel;
 use TomatoPHP\FilamentTranslationComponent\Components\Translation;
 
-class PaymentGateway extends Page implements Tables\Contracts\HasTable
+class PaymentGateway extends Page implements HasTable
 {
-    use Tables\Concerns\InteractsWithTable;
+    use InteractsWithTable;
 
     public static function shouldRegisterNavigation(): bool
     {
@@ -35,9 +32,9 @@ class PaymentGateway extends Page implements Tables\Contracts\HasTable
 
     protected ?string $status = null;
 
-    protected static ?string $navigationIcon = 'heroicon-o-cog';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-cog';
 
-    protected static string $view = "filament-payments::pages.payment-gateway";
+    protected string $view = 'filament-payments::pages.payment-gateway';
 
     public array $data = [];
 
@@ -45,7 +42,6 @@ class PaymentGateway extends Page implements Tables\Contracts\HasTable
     {
         return trans('filament-payments::messages.payment_gateways.title');
     }
-
 
     public function mount(): void
     {
@@ -56,12 +52,11 @@ class PaymentGateway extends Page implements Tables\Contracts\HasTable
     {
         return [
             Action::make('back')
-                ->action(fn()=> redirect()->to(PaymentResource::getUrl('index')))
+                ->url(fn (): string => PaymentResource::getUrl('index'))
                 ->color('danger')
                 ->label(trans('filament-payments::messages.payment_gateways.back')),
         ];
     }
-
 
     public function table(Table $table): Table
     {
@@ -70,28 +65,27 @@ class PaymentGateway extends Page implements Tables\Contracts\HasTable
             ->paginated(false)
             ->reorderable('sort_order')
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->label(trans('filament-payments::messages.payment_gateways.columns.name')),
-                Tables\Columns\TextColumn::make('alias')
+                TextColumn::make('alias')
                     ->label(trans('filament-payments::messages.payment_gateways.columns.alias')),
-                Tables\Columns\ToggleColumn::make('status')
+                ToggleColumn::make('status')
                     ->label(trans('filament-payments::messages.payment_gateways.columns.status')),
-                Tables\Columns\BooleanColumn::make('crypto')
+                IconColumn::make('crypto')
+                    ->boolean()
                     ->label(trans('filament-payments::messages.payment_gateways.columns.crypto')),
             ])
-            ->filters([
-                //
-            ])
-            ->actions([
-                Tables\Actions\Action::make('edit')
+            ->recordActions([
+                Action::make('edit')
                     ->label(trans('filament-payments::messages.payment_gateways.edit'))
                     ->tooltip(trans('filament-payments::messages.payment_gateways.edit'))
                     ->icon('heroicon-s-pencil')
                     ->iconButton()
-                    ->form([
+                    ->schema([
                         SpatieMediaLibraryFileUpload::make('image')
                             ->label(trans('filament-payments::messages.payment_gateways.sections.payment_gateway_data.columns.image'))
                             ->collection('image')
+                            ->visibility('public')
                             ->columnSpanFull(),
                         Translation::make('name')
                             ->label(trans('filament-payments::messages.payment_gateways.sections.payment_gateway_data.columns.name'))
@@ -134,17 +128,16 @@ class PaymentGateway extends Page implements Tables\Contracts\HasTable
                             ])
                             ->columns(3),
                     ])
-                    ->fillForm(fn($record) => $record->toArray())
-                    ->action(function (array $data, $record){
+                    ->fillForm(fn (PaymentGatewayModel $record): array => $record->toArray())
+                    ->action(function (array $data, PaymentGatewayModel $record): void {
                         $record->update($data);
+
                         Notification::make()
                             ->title(trans('filament-payments::messages.view.gateway_updated.title'))
                             ->body(trans('filament-payments::messages.view.gateway_updated.body'))
+                            ->success()
                             ->send();
                     }),
-            ])
-            ->bulkActions([
-                //
             ])
             ->searchable();
     }

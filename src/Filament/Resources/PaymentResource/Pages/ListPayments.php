@@ -2,11 +2,10 @@
 
 namespace TomatoPHP\FilamentPayments\Filament\Resources\PaymentResource\Pages;
 
+use Filament\Actions\Action;
 use Filament\Resources\Pages\ManageRecords;
 use TomatoPHP\FilamentPayments\Filament\Pages\PaymentGateway;
 use TomatoPHP\FilamentPayments\Filament\Resources\PaymentResource;
-use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
 
 class ListPayments extends ManageRecords
 {
@@ -15,7 +14,7 @@ class ListPayments extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('payment')
+            Action::make('payment')
                 ->url(PaymentGateway::getUrl())
                 ->label(trans('filament-payments::messages.payment_gateways.title'))
                 ->tooltip(trans('filament-payments::messages.payment_gateways.title'))

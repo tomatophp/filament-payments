@@ -45,6 +45,13 @@ Manage your payments inside FilamentPHP app with multi payment gateway integrati
 - [ ] Payfort Integration
 - [ ] Fawery Integration
 
+## Compatibility
+
+| Package version | Filament | Laravel | PHP  |
+|-----------------|----------|---------|------|
+| 5.x             | 5.x      | 12 / 13 | 8.2+ |
+| 1.x (`v3` branch) | 3.x    | 10 / 11 | 8.1+ |
+
 ## Installation
 
 ```bash
@@ -215,6 +222,15 @@ public function boot(): void
 ```
 
 it will redirect you to payment after the hook is called.
+
+## Payment Page Guard
+
+The payment page (`/pay/{trx}`) requires an authenticated user. By default it uses your app's default guard; to use another one, publish the config and set:
+
+```php
+// config/filament-payments.php
+'guard' => 'accounts',
+```
 
 ## Publish Assets
 

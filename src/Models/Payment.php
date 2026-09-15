@@ -2,10 +2,12 @@
 
 namespace TomatoPHP\FilamentPayments\Models;
 
+use App\Models\Team;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Str;
-use App\Models\Team;
 
 /**
  * @property int model_id
@@ -32,7 +34,6 @@ use App\Models\Team;
  * @property string created_at
  * @property string updated_at
  * @property PaymentGateway gateway
- *
  */
 class Payment extends Model
 {
@@ -64,7 +65,7 @@ class Payment extends Model
         'shipping_info',
         'billing_info',
         'created_at',
-        'updated_at'
+        'updated_at',
     ];
 
     /**
@@ -91,34 +92,22 @@ class Payment extends Model
         });
     }
 
-    /**
-     * @return MorphTo
-     */
-    public function account(): \Illuminate\Database\Eloquent\Relations\MorphTo
+    public function account(): MorphTo
     {
         return $this->morphTo('account');
     }
 
-    /**
-     * @return MorphTo
-     */
-    public function model(): \Illuminate\Database\Eloquent\Relations\MorphTo
+    public function model(): MorphTo
     {
         return $this->morphTo('model');
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function gateway(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function gateway(): BelongsTo
     {
         return $this->belongsTo(PaymentGateway::class, 'method_id', 'id');
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function team(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class, 'model_id');
     }

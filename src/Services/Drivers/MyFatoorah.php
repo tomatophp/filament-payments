@@ -3,8 +3,10 @@
 namespace TomatoPHP\FilamentPayments\Services\Drivers;
 
 use Exception;
+use Illuminate\Foundation\Application;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Routing\Redirector;
 use MyFatoorah\Library\API\Payment\MyFatoorahPayment;
 use MyFatoorah\Library\API\Payment\MyFatoorahPaymentStatus;
 use TomatoPHP\FilamentPayments\Models\Payment;
@@ -20,55 +22,59 @@ class MyFatoorah extends Driver
         $config = [
             'apiKey' => $gatewayParameters['api_key'],
             'countryCode' => $payment->method_currency,
-            'isTest' => (bool)$gatewayParameters['test_mode'],
+            'isTest' => (bool) $gatewayParameters['test_mode'],
         ];
 
         try {
             $mfObj = new MyFatoorahPayment($config);
             $postFields = [
                 'NotificationOption' => 'Lnk',
-                'InvoiceValue'       => $payment->amount + $payment->charge,
-                'CustomerName'       => $payment->customer['name'],
-                'CallBackUrl'        => route('payments.callback', 'MyFatoorah') . "?session=$payment->trx",
-                'ErrorUrl'           => route('payment.cancel', $payment->trx),
+                'InvoiceValue' => $payment->amount + $payment->charge,
+                'CustomerName' => $payment->customer['name'],
+                'CallBackUrl' => route('payments.callback', 'MyFatoorah')."?session=$payment->trx",
+                'ErrorUrl' => route('payment.cancel', $payment->trx),
             ];
 
             $data = $mfObj->getInvoiceURL($postFields);
 
             $send['session'] = $data['invoiceId'];
             $send['redirect'] = $data['invoiceURL'];
+
             return json_encode($send);
         } catch (Exception $e) {
             $send['error'] = true;
             $send['message'] = $e->getMessage();
+
             return json_encode($send);
         }
     }
 
-    public static function verify(Request $request): \Illuminate\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+    public static function verify(Request $request): Application|RedirectResponse|Redirector
     {
         $gatewayData = \TomatoPHP\FilamentPayments\Models\PaymentGateway::where('alias', 'MyFatoorah')->orderBy('id', 'desc')->firstOrFail();
         $gatewayParameters = $gatewayData->gateway_parameters;
 
-        $sessionId = $request->get('session');
+        $sessionId = $request->input('session');
 
-        $payment = Payment::where('trx',  $sessionId)->where('status', 0)->firstOrFail();
+        $payment = Payment::where('trx', $sessionId)->where('status', 0)->firstOrFail();
 
         $config = [
             'apiKey' => $gatewayParameters['api_key'],
             'countryCode' => $payment->method_currency,
-            'isTest' => (bool)$gatewayParameters['test_mode'],
+            'isTest' => (bool) $gatewayParameters['test_mode'],
         ];
 
         $mfObj = new MyFatoorahPaymentStatus($config);
 
         $data = $mfObj->getPaymentStatus($payment->method_code, 'InvoiceId');
 
-        if ($data->InvoiceStatus === "Paid") {
+        if ($data->InvoiceStatus === 'Paid') {
             self::paymentDataUpdate($payment);
+
             return redirect($payment->success_url);
         } else {
             self::paymentDataUpdate($payment, true);
+
             return redirect($payment->failed_url);
         }
     }
@@ -80,8 +86,8 @@ class MyFatoorah extends Driver
             ->status(true)
             ->crypto(false)
             ->gateway_parameters([
-                "api_key" => "",
-                "test_mode" => "",
+                'api_key' => '',
+                'test_mode' => '',
             ])
             ->supported_currencies([
                 PaymentCurrency::make('KWT')

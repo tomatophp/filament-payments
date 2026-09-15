@@ -6,33 +6,38 @@ use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\InteractsWithFormActions;
-use Illuminate\Support\Facades\Blade;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
+use Throwable;
 use TomatoPHP\FilamentPayments\Models\Payment;
 use TomatoPHP\FilamentPayments\Models\PaymentGateway;
 use TomatoPHP\FilamentPayments\Services\Drivers\Driver;
 
-class PaymentProcess extends Component implements HasForms, HasActions
+class PaymentProcess extends Component implements HasActions, HasForms
 {
     use InteractsWithActions;
     use InteractsWithFormActions;
     use InteractsWithForms;
 
     public $payment;
-    public $gateways;
-    public $userIp;
-    public $selectedGateway;
-    public $viewToRender;
-    public $data;
-    public $response;
 
+    public $gateways;
+
+    public $userIp;
+
+    public $selectedGateway;
+
+    public $viewToRender;
+
+    public $data;
+
+    public $response;
 
     public function mount($trx)
     {
@@ -43,6 +48,7 @@ class PaymentProcess extends Component implements HasForms, HasActions
 
         $this->gateways = $gateways->filter(function ($gateway) {
             $supportedCurrencies = collect($gateway->supported_currencies);
+
             return $supportedCurrencies->contains('currency', $this->payment->method_currency);
         });
 
@@ -53,39 +59,39 @@ class PaymentProcess extends Component implements HasForms, HasActions
         $this->calculateFee();
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form->schema([
+        return $schema->components([
             Section::make(trans('filament-payments::messages.view.choose_payment_method'))
                 ->schema([
                     Radio::make('gateway')
                         ->default($this->gateways->first()?->id)
                         ->live()
                         ->hiddenLabel()
-                        ->afterStateUpdated(function (){
+                        ->afterStateUpdated(function () {
                             $this->calculateFee();
                         })
                         ->descriptions($this->gateways->pluck('description', 'id')->toArray())
                         ->options($this->gateways->pluck('name', 'id')->toArray())
                         ->view('filament-payments::forms.radio', ['gateways' => $this->gateways])
                         ->required(),
-                ])
+                ]),
         ])->statePath('data');
     }
 
-    public function paymentAction()
+    public function paymentAction(): Action
     {
         return Action::make('paymentAction')
             ->icon('heroicon-o-credit-card')
             ->label(trans('filament-payments::messages.view.choose_payment_method'))
-            ->action(function(){
+            ->action(function () {
                 $this->process();
             });
     }
 
     public function calculateFee()
     {
-        if (!$this->data['gateway']) {
+        if (! $this->data['gateway']) {
             return;
         }
 
@@ -99,8 +105,8 @@ class PaymentProcess extends Component implements HasForms, HasActions
             $currencyData = collect($supportedCurrencies)->firstWhere('currency', $currencyCode);
 
             if ($currencyData) {
-                $fixedFee = (float)$currencyData['fixed_charge'];
-                $percentageFee = (float)$currencyData['percent_charge'];
+                $fixedFee = (float) $currencyData['fixed_charge'];
+                $percentageFee = (float) $currencyData['percent_charge'];
                 $feeAmount = round($fixedFee + ($this->payment->amount * $percentageFee / 100), 2);
 
                 $this->payment->charge = $feeAmount;
@@ -121,16 +127,17 @@ class PaymentProcess extends Component implements HasForms, HasActions
         $currencyCode = $this->payment->method_currency;
         $currencyData = collect($supportedCurrencies)->firstWhere('currency', $currencyCode);
 
-        if (!$currencyData) {
+        if (! $currencyData) {
             Notification::make()
                 ->title(trans('filament-payments::messages.view.currency_not_supported'))
                 ->danger()
                 ->send();
+
             return;
         }
 
-        $fixedFee = (float)$currencyData['fixed_charge'];
-        $percentageFee = (float)$currencyData['percent_charge'];
+        $fixedFee = (float) $currencyData['fixed_charge'];
+        $percentageFee = (float) $currencyData['percent_charge'];
         $feeAmount = $fixedFee + ($this->payment->amount * $percentageFee / 100);
 
         $this->payment->update([
@@ -147,16 +154,15 @@ class PaymentProcess extends Component implements HasForms, HasActions
         /**
          * @var Driver $new
          */
-        foreach ($drivers as $driver){
-            if(str($driver)->contains($dirName)){
+        foreach ($drivers as $driver) {
+            if (str($driver)->contains($dirName)) {
                 $new = $driver;
                 break;
             }
         }
-        if(!$new){
+        if (! $new) {
             $new = "TomatoPHP\\FilamentPayments\\Services\\Drivers\\{$dirName}";
         }
-
 
         try {
             $data = $new::process($this->payment);
@@ -170,6 +176,7 @@ class PaymentProcess extends Component implements HasForms, HasActions
                     ->title($title)
                     ->danger()
                     ->send();
+
                 return;
             }
 
@@ -183,7 +190,7 @@ class PaymentProcess extends Component implements HasForms, HasActions
             } else {
                 $this->viewToRender = $this->response->view;
             }
-        }catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Log::error($e->getMessage());
 
             Notification::make()
