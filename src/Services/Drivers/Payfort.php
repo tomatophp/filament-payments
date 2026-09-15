@@ -20,6 +20,11 @@ class Payfort extends Driver
         return redirect()->to('/');
     }
 
+    public static function secretKeys(): array
+    {
+        return ['access_code', 'sha_request_phrase', 'sha_response_phrase'];
+    }
+
     public function integration(): array
     {
         return [];

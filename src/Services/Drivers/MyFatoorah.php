@@ -79,6 +79,11 @@ class MyFatoorah extends Driver
         }
     }
 
+    public static function secretKeys(): array
+    {
+        return ['api_key'];
+    }
+
     public function integration(): array
     {
         return PaymentGateway::make('MyFatoorah')

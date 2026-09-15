@@ -4,18 +4,19 @@ namespace TomatoPHP\FilamentPayments\Filament\Pages;
 
 use BackedEnum;
 use Filament\Actions\Action;
-use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Fieldset;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Illuminate\Support\Str;
 use TomatoPHP\FilamentPayments\Facades\FilamentPayments;
 use TomatoPHP\FilamentPayments\Filament\Resources\PaymentResource;
 use TomatoPHP\FilamentPayments\Models\PaymentGateway as PaymentGatewayModel;
@@ -81,7 +82,7 @@ class PaymentGateway extends Page implements HasTable
                     ->tooltip(trans('filament-payments::messages.payment_gateways.edit'))
                     ->icon('heroicon-s-pencil')
                     ->iconButton()
-                    ->schema([
+                    ->schema(fn (PaymentGatewayModel $record): array => [
                         SpatieMediaLibraryFileUpload::make('image')
                             ->label(trans('filament-payments::messages.payment_gateways.sections.payment_gateway_data.columns.image'))
                             ->collection('image')
@@ -94,13 +95,10 @@ class PaymentGateway extends Page implements HasTable
                         Translation::make('description')
                             ->label(trans('filament-payments::messages.payment_gateways.sections.payment_gateway_data.columns.description'))
                             ->columnSpanFull(),
-                        KeyValue::make('gateway_parameters')
-                            ->label(trans('filament-payments::messages.payment_gateways.sections.gateway_parameters_data.title'))
-                            ->keyLabel(trans('filament-payments::messages.payment_gateways.sections.gateway_parameters_data.columns.key'))
-                            ->valueLabel(trans('filament-payments::messages.payment_gateways.sections.gateway_parameters_data.columns.value'))
-                            ->editableKeys(false)
-                            ->addable(false)
-                            ->deletable(false),
+                        Fieldset::make(trans('filament-payments::messages.payment_gateways.sections.gateway_parameters_data.title'))
+                            ->schema(static::gatewayParameterFields($record))
+                            ->columns(1)
+                            ->columnSpanFull(),
                         Repeater::make('supported_currencies')
                             ->reorderable(false)
                             ->label(trans('filament-payments::messages.payment_gateways.sections.supported_currencies.title'))
@@ -128,8 +126,20 @@ class PaymentGateway extends Page implements HasTable
                             ])
                             ->columns(3),
                     ])
-                    ->fillForm(fn (PaymentGatewayModel $record): array => $record->toArray())
+                    ->fillForm(function (PaymentGatewayModel $record): array {
+                        $secretKeys = $record->secretKeys();
+
+                        return [
+                            ...$record->toArray(),
+                            // Secrets never leave the server; the password inputs start empty.
+                            'gateway_parameters' => collect($record->gateway_parameters ?? [])
+                                ->map(fn (mixed $value, string $key): mixed => in_array($key, $secretKeys, true) ? null : $value)
+                                ->all(),
+                        ];
+                    })
                     ->action(function (array $data, PaymentGatewayModel $record): void {
+                        $data['gateway_parameters'] = $record->mergeGatewayParameters($data['gateway_parameters'] ?? []);
+
                         $record->update($data);
 
                         Notification::make()
@@ -140,5 +150,32 @@ class PaymentGateway extends Page implements HasTable
                     }),
             ])
             ->searchable();
+    }
+
+    /**
+     * One input per gateway parameter; secret parameters are write-only password inputs.
+     *
+     * @return array<int, TextInput>
+     */
+    protected static function gatewayParameterFields(PaymentGatewayModel $record): array
+    {
+        $secretKeys = $record->secretKeys();
+
+        return collect(array_keys($record->gateway_parameters ?? []))
+            ->map(function (string $key) use ($secretKeys): TextInput {
+                $field = TextInput::make("gateway_parameters.{$key}")
+                    ->label(Str::headline($key));
+
+                if (in_array($key, $secretKeys, true)) {
+                    $field
+                        ->password()
+                        ->revealable(false)
+                        ->autocomplete('new-password')
+                        ->hint(trans('filament-payments::messages.payment_gateways.sections.gateway_parameters_data.keep_secret'));
+                }
+
+                return $field;
+            })
+            ->all();
     }
 }

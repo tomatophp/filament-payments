@@ -21,6 +21,17 @@ abstract class Driver
 
     abstract public function integration(): array;
 
+    /**
+     * Gateway parameter keys that hold secrets. They are never sent to the browser and a blank
+     * value in the edit form keeps the stored one. Custom drivers opt in by overriding this.
+     *
+     * @return array<int, string>
+     */
+    public static function secretKeys(): array
+    {
+        return [];
+    }
+
     public static function cancel($trx)
     {
         $payment = Payment::where('trx', $trx)->where('status', 0)->firstOrFail();

@@ -20,6 +20,11 @@ class Fawery extends Driver
         return redirect()->to('/');
     }
 
+    public static function secretKeys(): array
+    {
+        return ['security_key'];
+    }
+
     public function integration(): array
     {
         return [];

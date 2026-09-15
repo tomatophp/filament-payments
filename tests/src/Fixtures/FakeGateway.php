@@ -33,6 +33,11 @@ class FakeGateway extends Driver
         return redirect($payment->success_url);
     }
 
+    public static function secretKeys(): array
+    {
+        return ['secret_key'];
+    }
+
     public function integration(): array
     {
         return PaymentGateway::make('Fake Gateway')
@@ -41,6 +46,7 @@ class FakeGateway extends Driver
             ->crypto(false)
             ->gateway_parameters([
                 'secret_key' => '',
+                'public_key' => '',
             ])
             ->supported_currencies([
                 PaymentCurrency::make('USD')

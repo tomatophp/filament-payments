@@ -20,6 +20,11 @@ class Paytabs extends Driver
         return redirect()->to('/');
     }
 
+    public static function secretKeys(): array
+    {
+        return ['server_key'];
+    }
+
     public function integration(): array
     {
         return [];

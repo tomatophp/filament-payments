@@ -225,12 +225,25 @@ it will redirect you to payment after the hook is called.
 
 ## Payment Page Guard
 
-The payment page (`/pay/{trx}`) requires an authenticated user. By default it uses your app's default guard; to use another one, publish the config and set:
+The payment page (`/pay/{trx}`) requires an authenticated user. Since v5 it uses `config('filament-payments.guard')`, which defaults to your app's default guard (before v5 it was hard-coded to `auth:accounts`). To use another guard, or to get the old behaviour back, publish the config and set:
 
 ```php
 // config/filament-payments.php
 'guard' => 'accounts',
 ```
+
+## Gateway Secrets
+
+Gateway parameters are stored encrypted with your `APP_KEY`, and secret parameters are never sent to the browser: in the gateway edit modal they are empty password inputs, and leaving one blank keeps the current value. Each driver declares its secret keys; a custom driver opts in like this:
+
+```php
+public static function secretKeys(): array
+{
+    return ['secret_key'];
+}
+```
+
+If you rotate `APP_KEY`, re-enter your gateway keys.
 
 ## Publish Assets
 

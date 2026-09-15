@@ -56,6 +56,7 @@ return [
             ],
             'gateway_parameters_data' => [
                 'title' => 'Gateway Parameters Data',
+                'keep_secret' => 'Leave blank to keep the current value',
                 'columns' => [
                     'key' => 'Key',
                     'value' => 'Value',

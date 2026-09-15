@@ -81,6 +81,11 @@ class Cryptomus extends Driver
         return redirect($payment->failed_url);
     }
 
+    public static function secretKeys(): array
+    {
+        return ['payment_key', 'payout_key'];
+    }
+
     public function integration(): array
     {
         return PaymentGateway::make('Cryptomus')

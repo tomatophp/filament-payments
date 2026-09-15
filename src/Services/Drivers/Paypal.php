@@ -116,6 +116,11 @@ class Paypal extends Driver
         return redirect($redirectTo);
     }
 
+    public static function secretKeys(): array
+    {
+        return ['secret'];
+    }
+
     public function integration(): array
     {
         return PaymentGateway::make('Paypal')

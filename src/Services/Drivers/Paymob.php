@@ -87,6 +87,11 @@ class Paymob extends Driver
         }
     }
 
+    public static function secretKeys(): array
+    {
+        return ['api_key', 'hmac'];
+    }
+
     public function integration(): array
     {
         return PaymentGateway::make('Paymob')

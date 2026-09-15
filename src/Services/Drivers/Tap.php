@@ -94,6 +94,11 @@ class Tap extends Driver
         }
     }
 
+    public static function secretKeys(): array
+    {
+        return ['secret_key'];
+    }
+
     public function integration(): array
     {
         return PaymentGateway::make('Tap')

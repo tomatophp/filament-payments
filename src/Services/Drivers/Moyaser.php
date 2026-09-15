@@ -20,6 +20,11 @@ class Moyaser extends Driver
         return redirect()->to('/');
     }
 
+    public static function secretKeys(): array
+    {
+        return ['secret_key'];
+    }
+
     public function integration(): array
     {
         return [];

@@ -45,5 +45,5 @@ it('can edit a payment gateway', function () {
         ->callMountedAction()
         ->assertHasNoActionErrors();
 
-    expect($gateway->refresh()->gateway_parameters)->toBe(['secret_key' => 'sk_test_updated']);
+    expect($gateway->refresh()->gateway_parameters)->toBe(['secret_key' => 'sk_test_updated', 'public_key' => '']);
 });

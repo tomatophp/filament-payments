@@ -80,6 +80,11 @@ class StripeV3 extends Driver
         return redirect($payment->failed_url);
     }
 
+    public static function secretKeys(): array
+    {
+        return ['secret_key'];
+    }
+
     public function integration(): array
     {
         return PaymentGateway::make('Stripe')

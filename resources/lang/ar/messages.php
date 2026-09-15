@@ -56,6 +56,7 @@ return [
             ],
             'gateway_parameters_data' => [
                 'title' => 'بيانات تكوين الدفع',
+                'keep_secret' => 'اتركه فارغًا للاحتفاظ بالقيمة الحالية',
                 'columns' => [
                     'key' => 'المفتاح',
                     'value' => 'القيمة',
