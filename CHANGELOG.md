@@ -1,5 +1,9 @@
 # Changelog
 
+### v5.0.1
+
+- point `homepage` at the plugin page on tomatophp.com
+
 All notable changes to `filament-payments` will be documented in this file.
 
 ## v5.0.0

@@ -2,6 +2,7 @@
     "name": "tomatophp/filament-payments",
     "type": "library",
     "description": "Manage your payments inside FilamentPHP app with multi payment gateway integration",
+    "homepage": "https://tomatophp.com/en/plugins/filament-payments",
     "keywords": [
         "php",
         "laravel",
@@ -79,5 +80,5 @@
         "test-coverage": "vendor/bin/pest --coverage",
         "format": "vendor/bin/pint"
     },
-    "version": "5.0.0"
+    "version": "5.0.1"
 }
