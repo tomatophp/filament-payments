@@ -1,9 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\URL;
+use TomatoPHP\FilamentPayments\Livewire\PaymentProcess;
 use TomatoPHP\FilamentPayments\Tests\Models\User;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 
 beforeEach(function () {
     $this->user = User::factory()->create(['name' => 'Acme Store', 'email' => 'owner@example.test']);
@@ -145,4 +147,15 @@ it('hands signed links to the callers that create payments', function () {
         ->and(URL::hasValidSignature(request()->create($payment->cancelUrl(['session' => $payment->trx]))))->toBeTrue()
         ->and($payment->payUrl())->toContain('signature=')
         ->and($payment->cancelUrl())->toContain('signature=');
+});
+
+it('does not process a payment that was cancelled after the page was opened', function () {
+    actingAs($this->user, 'testing');
+    $payment = createPayment($this->user);
+
+    $component = livewire(PaymentProcess::class, ['trx' => $payment->trx]);
+
+    $payment->update(['status' => 2]);
+
+    $component->call('process')->assertForbidden();
 });

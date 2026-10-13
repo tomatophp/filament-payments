@@ -131,6 +131,10 @@ class PaymentProcess extends Component implements HasActions, HasForms
 
     public function process()
     {
+        $this->payment->refresh();
+
+        abort_unless($this->payment->status == 0 && $this->payment->allowsAccessBy(request()->user(config('filament-payments.guard'))), 403);
+
         $this->validate([
             'selectedGateway' => 'required',
         ]);

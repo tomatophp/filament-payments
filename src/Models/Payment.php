@@ -145,7 +145,7 @@ class Payment extends Model
     {
         $parameters = ['trx' => $trx, ...$query];
 
-        return $minutes
+        return $minutes !== null
             ? URL::temporarySignedRoute($name, now()->addMinutes((int) $minutes), $parameters)
             : URL::signedRoute($name, $parameters);
     }
