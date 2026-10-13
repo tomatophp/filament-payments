@@ -115,7 +115,7 @@ return redirect()->to(
     );
 ```
 
-if you want to return it as json you can just make `json: true`, this method return a URL for you with the payment, you can share this link with anyone to make the payment done.
+if you want to return it as json you can just make `json: true`, this method return a URL for you with the payment, you can share this signed link with the customer to make the payment done (see [Payment Links](#payment-links)).
 
 ## Use Payment Action
 
@@ -215,6 +215,30 @@ public function boot(): void
 ```
 
 it will redirect you to payment after the hook is called.
+
+## Payment Links
+
+The payment page (`/pay/{trx}`) and the gateway cancel return (`GET /pay/{trx}/cancel`) are protected by Laravel signed URLs, and only the payment owner can open or cancel a payment. Route names are unchanged, but **links must now come from the package**: `FilamentPayments::pay()`, the `PaymentAction` and the `pay/initiate` API already return signed links; if you build one yourself use the payment model:
+
+```php
+$payment->payUrl();       // signed link to the payment page
+$payment->cancelUrl();    // signed link a gateway can redirect the customer back to
+```
+
+A plain `route('payment.index', $trx)` (or a hand-written `/pay/{trx}` link) is rejected with a 403. Breaking changes:
+
+- Payment page links expire (default 24 hours) and cancel return links expire (default 3 days). Change it, or pass `null` to never expire, in the published config:
+
+```php
+// config/filament-payments.php
+'links' => [
+    'pay_expires' => 60 * 24,      // minutes
+    'cancel_expires' => 60 * 24 * 3,
+],
+```
+
+- Cancelling from the payment page is now a CSRF protected `POST /pay/{trx}/cancel` (route `payment.cancel.submit`). The signed `GET` cancel route is only meant for gateway redirects; custom drivers must use `$payment->cancelUrl()` for their cancel/return URL (extra query parameters go in `cancelUrl(['session' => $payment->trx])` so they are part of the signature).
+- The signed-in user must own the payment: the payment `model` is the user, the user can access the payment `model` as a team/tenant (`canAccessTenant()` / `belongsToTeam()`), or the payment `customer.email` matches the user's email. Anyone else gets a 403. If your payment links are meant to be paid by a different account, set `'enforce_owner' => false` in the config (the signed link is then the only check).
 
 ## Publish Assets
 
