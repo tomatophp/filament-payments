@@ -36,7 +36,7 @@ class StripeV3 extends Driver
                     'quantity' => 1,
                 ]],
                 'mode' => 'payment',
-                'cancel_url' => route('payment.cancel', $payment->trx),
+                'cancel_url' => $payment->cancelUrl(),
                 'success_url' => route('payments.callback', ['gateway' => $alias]).'?session={CHECKOUT_SESSION_ID}',
             ]);
 

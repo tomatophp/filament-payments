@@ -13,9 +13,11 @@ use TomatoPHP\FilamentPayments\Services\Drivers\Driver;
 
 class PaymentController extends Controller
 {
-    public function cancel($trx)
+    public function cancel(Request $request, string $trx)
     {
         $payment = Payment::where('trx', $trx)->where('status', 0)->firstOrFail();
+
+        abort_unless($payment->allowsAccessBy($request->user(config('filament-payments.guard'))), 403);
 
         // Update Status
         $payment->status = 2;
@@ -118,7 +120,7 @@ class PaymentController extends Controller
             'message' => trans('filament-payments::messages.view.payment_created_successfully'),
             'data' => [
                 'id' => $payment->trx,
-                'url' => route('payment.index', $payment->trx),
+                'url' => $payment->payUrl(),
             ],
         ], 201);
     }

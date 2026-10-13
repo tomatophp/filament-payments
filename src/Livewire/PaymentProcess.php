@@ -42,6 +42,9 @@ class PaymentProcess extends Component implements HasActions, HasForms
     public function mount($trx)
     {
         $this->payment = Payment::where('trx', $trx)->where('status', 0)->firstOrFail();
+
+        abort_unless($this->payment->allowsAccessBy(request()->user(config('filament-payments.guard'))), 403);
+
         $this->userIp = request()->ip();
 
         $gateways = PaymentGateway::where('status', 1)->orderBy('sort_order', 'asc')->get();

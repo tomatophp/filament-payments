@@ -25,7 +25,7 @@ class Cryptomus extends Driver
                 'amount' => strval($payment->amount + $payment->charge),
                 'currency' => $payment->method_currency,
                 'order_id' => $payment->trx,
-                'url_return' => route('payment.cancel', $payment->trx),
+                'url_return' => $payment->cancelUrl(),
                 'url_success' => route('payments.callback', 'Cryptomus')."?session=$payment->trx",
                 'url_callback' => route('payments.callback', 'Cryptomus')."?session=$payment->trx",
                 'is_payment_multiple' => true,

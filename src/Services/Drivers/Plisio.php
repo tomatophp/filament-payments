@@ -32,7 +32,7 @@ class Plisio extends Driver
                 'order_number' => $payment->trx,
                 'source_amount' => number_format($payment->amount + $payment->charge, 8, '.', ''),
                 'source_currency' => $payment->method_currency,
-                'cancel_url' => route('payment.cancel', $payment->trx),
+                'cancel_url' => $payment->cancelUrl(),
                 'callback_url' => route('payments.callback', 'Plisio')."?session=$payment->trx",
                 'success_url' => route('payments.callback', 'Plisio')."?session=$payment->trx",
                 'email' => $payment->customer['email'],
