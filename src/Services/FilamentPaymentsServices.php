@@ -93,12 +93,12 @@ class FilamentPaymentsServices
                 'message' => 'Payment created successfully',
                 'data' => [
                     'id' => $payment->trx,
-                    'url' => route('payment.index', $payment->trx),
+                    'url' => $payment->payUrl(),
                 ]
             ], 201);
         }
         else {
-            return route('payment.index', $payment->trx);
+            return $payment->payUrl();
         }
     }
 

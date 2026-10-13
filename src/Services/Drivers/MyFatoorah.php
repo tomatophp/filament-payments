@@ -30,7 +30,7 @@ class MyFatoorah extends Driver
                 'InvoiceValue'       => $payment->amount + $payment->charge,
                 'CustomerName'       => $payment->customer['name'],
                 'CallBackUrl'        => route('payments.callback', 'MyFatoorah') . "?session=$payment->trx",
-                'ErrorUrl'           => route('payment.cancel', $payment->trx),
+                'ErrorUrl'           => $payment->cancelUrl(),
             ];
 
             $data = $mfObj->getInvoiceURL($postFields);

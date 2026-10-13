@@ -58,6 +58,13 @@
             <div>
                 {{ $this->paymentAction }}
             </div>
+
+            <form method="POST" action="{{ $payment->cancelSubmitUrl() }}">
+                @csrf
+                <button type="submit" class="text-sm text-gray-400">
+                    {{ trans('filament-payments::messages.view.cancel_payment') }}
+                </button>
+            </form>
         </div>
     </div>
 

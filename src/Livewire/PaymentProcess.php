@@ -36,6 +36,9 @@ class PaymentProcess extends Component implements HasForms, HasActions
     public function mount($trx)
     {
         $this->payment = Payment::where('trx', $trx)->where('status', 0)->firstOrFail();
+
+        abort_unless($this->payment->allowsAccessBy(request()->user('accounts')), 403);
+
         $this->userIp = request()->ip();
 
         $gateways = PaymentGateway::where('status', 1)->orderBy('sort_order', 'asc')->get();
@@ -110,6 +113,10 @@ class PaymentProcess extends Component implements HasForms, HasActions
 
     public function process()
     {
+        $this->payment->refresh();
+
+        abort_unless($this->payment->status == 0 && $this->payment->allowsAccessBy(request()->user('accounts')), 403);
+
         $this->validate([
             'selectedGateway' => 'required',
         ]);
