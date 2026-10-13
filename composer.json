@@ -80,5 +80,5 @@
         "test-coverage": "vendor/bin/pest --coverage",
         "format": "vendor/bin/pint"
     },
-    "version": "5.0.1"
+    "version": "5.0.2"
 }

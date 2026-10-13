@@ -137,7 +137,7 @@ abstract class Driver
             'message' => trans('filament-payments::messages.view.payment_created_successfully'),
             'data' => [
                 'id' => $payment->trx,
-                'url' => route('payment.index', $payment->trx),
+                'url' => $payment->payUrl(),
             ],
         ], 201);
     }

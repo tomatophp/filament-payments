@@ -50,7 +50,7 @@ class Paypal extends Driver
                 ],
             ],
             'application_context' => [
-                'cancel_url' => route('payment.cancel', $payment->trx)."?session=$payment->trx",
+                'cancel_url' => $payment->cancelUrl(['session' => $payment->trx]),
                 'return_url' => route('payments.callback', 'Paypal')."?session=$payment->trx",
             ],
         ];

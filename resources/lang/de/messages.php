@@ -121,6 +121,7 @@ return [
         'payment_gateway_fee' => 'Zahlungsgebühr',
         'total' => 'Gesamtbetrag',
         'pay_now' => 'Jetzt kostenpflichtig bestellen',
+        'cancel_payment' => 'Zahlung abbrechen',
         'contact_us' => 'Falls beim Zahlungsvorgang Probleme auftreten oder Sie den gebuchten Service nicht erhalten, kontaktieren Sie uns bitte direkt.',
         'signed_in_as' => 'Angemeldet als',
         'managing_billing_for' => 'Abrechnung für',

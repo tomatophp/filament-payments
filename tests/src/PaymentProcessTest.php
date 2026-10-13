@@ -29,7 +29,7 @@ it('serves the payment page over http', function () {
     createFakeGateway();
     $payment = createPayment($this->user);
 
-    $html = $this->get(route('payment.index', $payment->trx))
+    $html = $this->get($payment->payUrl())
         ->assertSuccessful()
         ->assertSee('Order #1001')
         ->assertSee('filament-payments.css', false)
@@ -50,7 +50,7 @@ it('does not open the payment page for a completed payment', function () {
     createFakeGateway();
     $payment = createPayment($this->user, ['status' => 1]);
 
-    $this->get(route('payment.index', $payment->trx))->assertNotFound();
+    $this->get($payment->payUrl())->assertNotFound();
 });
 
 it('rounds the gateway fee to two decimals', function () {
